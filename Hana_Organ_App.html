@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>H.Fugue 調香台 Organ｜Student App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf9f6;--paper:#fffdfa;--ink:#1f2933;--muted:#7b817e;--line:#ddd8ce;--line2:#c9c2b6;--accent:#374151;--soft:#f3f2ed;--green:#627866;--gold:#b99b5f;--danger:#b45a48;}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6} button,input,select,textarea{font:inherit} button{cursor:pointer}
+.header{position:sticky;top:0;z-index:20;background:#171412;color:white;padding:18px 22px;border-bottom:2px solid var(--gold);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:.02em;line-height:1.05} .brand a{color:inherit;text-decoration:none;display:inline-block}.brand a:hover{opacity:.78}.brand small{display:block;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:.18em;color:#b9afa2;text-transform:uppercase;margin-top:4px}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.hidden-file{display:none}.install-hint{font-size:11px;color:#b9afa2} .pill{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#e8e0d6;border-radius:999px;padding:7px 12px;font-size:12px}
+.btn{border:1px solid var(--line2);background:white;color:var(--accent);border-radius:10px;padding:9px 13px;font-weight:500} .btn.dark{background:var(--accent);color:white;border-color:var(--accent)} .btn.gold{background:var(--gold);border-color:var(--gold);color:#1b1711} .btn.danger{background:#fff4f0;border-color:#e4b3a8;color:var(--danger)}
+.tabs{position:sticky;top:74px;z-index:18;background:var(--paper);border-bottom:1px solid var(--line);display:flex;gap:0;padding:0 20px;overflow:auto} .tab{border:0;background:transparent;padding:14px 18px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap} .tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.panel{display:none;padding:22px;max-width:1280px;margin:0 auto 80px} .panel.active{display:block}
+.toolbar-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px} .section-title{font-family:'DM Serif Display',serif;font-size:30px;line-height:1.1} .section-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.toolbar{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center} .toolbar.collapsed{display:none}
+.search{flex:1;min-width:220px} input,select,textarea{border:1px solid var(--line2);border-radius:12px;background:#fffefb;color:var(--ink);padding:10px 12px;outline:none} input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(55,65,81,.08)} .search input{width:100%}
+.chip{border:1px solid var(--line2);background:#fffefb;color:#5e625f;border-radius:999px;padding:7px 12px;font-size:12px} .chip.active{background:var(--accent);color:white;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px} .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 6px 20px rgba(0,0,0,.03);position:relative;min-height:132px} .card:hover{border-color:var(--accent)}
+.card .type{position:absolute;right:12px;top:12px;font-size:11px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:3px 8px;color:var(--muted)} .en{font-weight:600;font-size:16px;padding-right:72px} .cn{font-size:14px;color:#555b58;margin-top:2px} .meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px} .tag{font-size:11px;border-radius:999px;background:var(--soft);border:1px solid var(--line);padding:2px 8px;color:#6d716f} .tag.note{background:#eef4ee;color:#405a44}
+.card-actions{display:flex;gap:8px;margin-top:12px} .mini{font-size:12px;padding:6px 9px;border-radius:9px;border:1px solid var(--line2);background:white;color:var(--accent)}
+.drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.36);z-index:50;display:none;justify-content:flex-end} .drawer-bg.open{display:flex} .drawer{width:min(620px,100vw);height:100%;background:var(--paper);overflow:auto;border-left:1px solid var(--line);padding:22px} .drawer-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px} .drawer-title{font-family:'DM Serif Display',serif;font-size:26px} .drawer-sub{color:var(--muted)}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} .fg{display:flex;flex-direction:column;gap:5px} label{font-size:12px;color:var(--muted);letter-spacing:.04em} .fg.full{grid-column:1/-1} textarea{min-height:90px;resize:vertical}
+.advisor{border:1px solid var(--line);border-radius:14px;background:#fffefb;padding:10px;margin:8px 0} .advisor input{width:100%;margin-bottom:8px} .advisor textarea{width:100%;min-height:74px} .advisor-head{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.choice-collapse{border:1px solid var(--line2);border-radius:12px;background:#fffefb;overflow:hidden}.choice-collapse summary{list-style:none;cursor:pointer;padding:10px 12px;color:var(--accent);font-weight:500;display:flex;align-items:center;justify-content:space-between;gap:8px}.choice-collapse summary::-webkit-details-marker{display:none}.choice-collapse summary:after{content:'展開';font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px;background:var(--soft)}.choice-collapse[open] summary{border-bottom:1px solid var(--line);background:#fbfaf6}.choice-collapse[open] summary:after{content:'收合'}.choice-select{width:100%;min-height:42px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:#fffefb;color:var(--ink);padding:9px 10px;outline:none}.choice-select[multiple]{min-height:112px}.choice-select:focus{box-shadow:inset 0 0 0 3px rgba(55,65,81,.08)}.choice-hint{font-size:11px;color:var(--muted);padding:6px 10px 10px}.choice-other{margin:8px 10px 0;width:calc(100% - 20px)}
+.recipe-card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.035)} .recipe-top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px} .recipe-top .fg.full{grid-column:1/-1}
+.formula-manager{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.formula-manager-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.formula-manager select{min-width:260px}.formula-count{font-size:12px;color:var(--muted)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fffefb} table{width:100%;border-collapse:collapse;min-width:1100px} th,td{border-bottom:1px solid var(--line);padding:9px;vertical-align:middle} th{font-size:12px;color:var(--muted);font-weight:600;text-align:left;background:#fbfaf6} td input,td select{width:100%;min-width:80px} .narrow{width:90px} .name-col{min-width:260px} .reason-col{min-width:230px}
+.calc{font-weight:600;color:var(--green)} .muted{color:var(--muted)} .totals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0} .total-box{border:1px solid var(--line);background:#fffefb;border-radius:14px;padding:12px} .total-label{font-size:12px;color:var(--muted)} .total-val{font-size:18px;font-weight:600;margin-top:2px}
+.warn{display:none;background:#fff7e8;border:1px solid #e9c986;color:#80602a;padding:10px 12px;border-radius:14px;margin-bottom:12px} .warn.show{display:block} .submit-msg{margin-left:10px;color:var(--muted);font-size:13px}
+@media(max-width:780px){.header{padding:14px 16px}.brand{font-size:22px}.tabs{top:66px;padding:0 10px}.panel{padding:16px}.recipe-top{grid-template-columns:1fr}.totals{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.section-title{font-size:26px}}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/logo-192.png">
+<meta name="theme-color" content="#374151">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="調香台 Organ">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+<header class="header"><div class="brand"><a href="https://www.hanascent.com/" target="_blank" rel="noopener">調香台 Organ<small>H.Fugue Atelier · by Hana</small></a></div><div class="top-actions"><span class="pill" id="countBadge">0 種原料</span><button class="btn" id="installAppBtn" onclick="installApp()">下載成 App</button><button class="btn gold" onclick="openNewMaterial()">＋ 新增原料</button></div></header>
+<nav class="tabs"><button class="tab active" onclick="switchTab('library')">單體／香基庫</button><button class="tab" onclick="switchTab('formula')">調香配方表</button></nav>
+<section class="panel active" id="panel-library">
+  <div class="toolbar-head"><div><div class="section-title">單體／香基庫</div><div class="section-sub">單體原料與 80 種香基合併管理；香基字樣已統一。</div></div><button class="btn" onclick="toggleToolbar()">收合／展開搜尋</button></div>
+  <div class="toolbar" id="toolbar"><div class="search"><input id="searchInput" placeholder="搜尋英文、中文、香調、CAS…" oninput="renderLibrary()"></div><select id="scentFilter" onchange="renderLibrary()" style="min-width:150px" aria-label="香調篩選"><option value="">全部香調</option></select><button class="chip active" data-note="" onclick="setNoteFilter(this)">全部</button><button class="chip" data-note="Top" onclick="setNoteFilter(this)">Top</button><button class="chip" data-note="Middle" onclick="setNoteFilter(this)">Middle</button><button class="chip" data-note="Base" onclick="setNoteFilter(this)">Base</button><button class="chip" data-kind="單體" onclick="setKindFilter(this)">單體</button><button class="chip" data-kind="精油" onclick="setKindFilter(this)">精油</button><button class="chip" data-kind="香基" onclick="setKindFilter(this)">香基</button><button class="chip" onclick="sortMaterials()">英文 A–Z</button></div>
+  <div class="grid" id="materialGrid"></div>
+</section>
+<section class="panel" id="panel-formula">
+  <div class="toolbar-head"><div><div class="section-title">調香配方表</div><div class="section-sub">可建立多支香水配方；每支配方會各自保存作品名稱、設計敘述與原料列。</div></div><button class="btn" onclick="addFormulaRow()">＋ 新增一列</button></div>
+  <div class="formula-manager">
+    <div class="formula-manager-left"><label for="formulaSelector">目前配方</label><select id="formulaSelector" onchange="selectFormula(this.value)"></select><span class="formula-count" id="formulaCount">0 支配方</span></div>
+    <div class="formula-manager-left"><button class="btn gold" onclick="newFormula()">＋ 新增香水配方</button><button class="btn" onclick="duplicateFormula()">複製目前配方</button><button class="btn danger" onclick="deleteCurrentFormula()">刪除目前配方</button></div>
+  </div>
+  <div class="recipe-card">
+    <div class="recipe-top">
+      <div class="fg"><label>學生姓名</label><input id="studentName" placeholder="姓名"></div>
+      <div class="fg"><label>課程場次</label><input id="classSession" placeholder="例如 2026/05/xx"></div>
+      <div class="fg"><label>作品名稱</label><input id="workName" placeholder="香水名稱"></div>
+      <div class="fg"><label>香水容量（g）</label><input id="perfumeCapacity" type="number" step="0.01" value="10" oninput="recalc()"></div>
+      <div class="fg"><label>香水濃度百分比</label><input id="perfumeConcentration" type="text" value="20%" oninput="recalc()" placeholder="20%"></div>
+      <div class="fg"><label>調製日期</label><input id="formulaDate" type="date"></div>
+      <div class="fg"><label>天氣</label><input id="weather" placeholder="晴 / 陰 / 雨…"></div>
+      <div class="fg"><label>室溫（°C）</label><input id="temperature" type="number" step="0.1" placeholder="25"></div>
+      <div class="fg"><label>備註</label><input id="quickNote" placeholder="例如：第一次試作"></div>
+      <div class="fg full"><label>香水設計敘述</label><textarea id="designNote" placeholder="描述這款香水的設計概念、情感氛圍、靈感來源、目標香調方向…"></textarea></div>
+    </div>
+    <div class="warn" id="mixWarn">提醒：同一張配方表同時使用 g 與滴數時，系統會分別依 g 與滴數組計算比例；建議同一份配方使用同一種記錄單位。</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th class="name-col">原料</th><th>原料濃度</th><th>用量</th><th>單位</th><th>佔比 %</th><th>需要的原料 g</th><th class="reason-col">選用原因</th><th></th></tr></thead><tbody id="formulaRows"></tbody></table></div>
+    <div class="totals"><div class="total-box"><div class="total-label">香料總克數</div><div class="total-val" id="totalG">0 g</div></div><div class="total-box"><div class="total-label">香料總滴數</div><div class="total-val" id="totalDrops">0 滴</div></div><div class="total-box"><div class="total-label">濃度×滴數加權總和</div><div class="total-val" id="totalDropWeight">0</div></div><div class="total-box"><div class="total-label">香水容量</div><div class="total-val" id="totalCapacity">0 g</div></div><div class="total-box"><div class="total-label">目標香料總量</div><div class="total-val" id="totalFragranceG">0 g</div></div></div>
+    <div><button class="btn" onclick="saveFormula()">儲存在本機</button> <button class="btn" onclick="downloadFormula()">下載 JSON</button> <button class="btn" onclick="document.getElementById('jsonUpload').click()">上傳 JSON</button> <input class="hidden-file" id="jsonUpload" type="file" accept="application/json,.json" onchange="importFormulaFile(event)"> <button class="btn dark" onclick="submitFormula()">送出給 Hana 老師</button><span class="submit-msg" id="submitMsg"></span></div>
+  </div>
+</section>
+<div class="drawer-bg" id="drawerBg" onclick="drawerBackdrop(event)"><aside class="drawer"><div class="drawer-top"><div><div class="drawer-title" id="drawerTitle">—</div><div class="drawer-sub" id="drawerSub">—</div></div><button class="btn" onclick="closeDrawer()">關閉</button></div><div id="drawerContent"></div></aside></div>
+<script src="config.js"></script>
+<script>
+const SUBMIT_FALLBACK='https://script.google.com/macros/s/AKfycbyue9QbgwV5xQQljLo6LiSzfP_rXsHL2mia72_WACBN89LA1X1sTDrYTG1WpAcQ5mooCg/exec';
+const SEED=[
+{id:1,en:"Methyl Benzoate",cn:"苯甲酸甲酯",note:["Top"],type:["Floral"],alias:[],cas:"93-58-3",inci:"METHYL BENZOATE",ifra:"IFRA 第51版：無限制（Cat.4）。EU：最高0.5%，防腐劑管制V/1a。",personal:"① 剛聞到的刺鼻味，直接延伸到鼻腔深處。\n② 類似成熟的香蕉感，濃度高時會有厭氧感。\n③ 香蕉味和花香，持香度中等。",advisors:[{name:"Re.",text:"呈現出杏仁、釋迦、厭氧感與沙龍巴斯的特徵。"}]},
+{id:2,en:"Ebanol",cn:"檀香木質調",note:["Base"],type:["Woody"],alias:["Matsunol","Muscosandrol"],cas:"67801-20-1",inci:"SANDAL PENTENOL",ifra:"IFRA 第51版：Cat.4無特定限制。建議0.5–5%。Givaudan研發。",personal:"① 回甘、甜味的中藥材、八角味，圓潤感，使心情愉快。\n② 木質香料感，鼻腔中段。\n③ 檀木香氣非常持香。",advisors:[{name:"Re.",text:"適合與白色花系（如茉莉花）進行搭配。"}]},
+{id:3,en:"Para-Cresyl Acetate",cn:"對甲酚乙酸酯",note:["Middle"],type:["Floral"],alias:["p-Cresyl Acetate","Narceol"],cas:"140-39-6",inci:"P-CRESYL ACETATE",ifra:"IFRA 第51版：Cat.4最高1.25%。建議以10%稀釋液操作。",personal:"① 臭臭的、類似乾大便的味道，鼻腔前段。\n② 動物騷味、百花、草皮感。\n③ 持香度低。",advisors:[{name:"Re.",text:"存在於茉莉花中；少量加入不喜歡的味道可以產生效果，若只加喜歡的味道則會顯得平庸。"}]},
+{id:4,en:"Eugenol",cn:"丁香酚",note:["Middle"],type:["Spicy","Woody"],alias:["4-Allylguaiacol"],cas:"97-53-0",inci:"EUGENOL",ifra:"IFRA 第51版：Cat.4最高2.5%。EU 26種致敏原：leave-on≥0.01%須標示。",personal:"① 香料感、牙醫感，鼻腔前段。\n② 明顯涼感。\n③ 持香度中等。",advisors:[{name:"Re.",text:"花朵中常用的Spicy元素（Rose, Jasmine, Muguet, Ylang Ylang），能增加花朵的鮮豔感。"}]},
+{id:5,en:"Indolene / Indole",cn:"吲哚",note:["Base"],type:["Floral","Animal"],alias:["1H-Benzo[b]pyrrole"],cas:"120-72-9",inci:"INDOLE",ifra:"IFRA 第51版：有限制，成品通常<0.1%。注意變色風險。",personal:"① 刺鼻。\n② 動物感、金屬感、水感，鼻腔中段。\n③ 白花香、乾淨、臭感。",advisors:[{name:"Re.",text:"適合與Musk、Ambrox搭配，白花系的調配幾乎都會用到。"}]},
+{id:6,en:"Geranyl Acetate",cn:"乙酸香葉酯",note:["Middle"],type:["Floral"],alias:["Geranyl Ethanoate"],cas:"105-87-3",inci:"GERANYL ACETATE",ifra:"IFRA 第51版：無限制。FEMA No.2509（GRAS）。",personal:"① 酵素、花香、酒香，鼻腔後段，感覺明亮。\n② 花香、空氣感。",advisors:[{name:"Re.",text:"呈現出玫瑰中花萼的感覺，帶有草本特徵。"}]},
+{id:7,en:"Hexyl Salicylate",cn:"水楊酸己酯",note:["Middle"],type:["Floral","Herbal"],alias:["Hexyl 2-hydroxybenzoate"],cas:"6259-76-3",inci:"HEXYL SALICYLATE",ifra:"IFRA 第51版：有限制（STD 042）。EU CLP：CMR Cat.2及致敏Cat.1。兒童<3歲最高0.1%。",personal:"① 酸、亮，鼻腔前段。\n② 綠葉、細微動物感（類瓦斯感）。",advisors:[{name:"Re.",text:"具備Aesop風格的清新草本感。百花原料通常都帶有些許動物感。"}]},
+{id:8,en:"Tetrahydro Mugual",cn:"鈴蘭醇",note:["Middle"],type:["Floral","Citrus"],alias:[],cas:"41723-66-4",inci:"TETRAHYDROMUGUOL",ifra:"IFRA 第51版：查無特定限制。建議向供應商取得合規聲明。",personal:"① 花香、暖感、柑橘味、果肉多汁。\n② 果肉多汁感。",advisors:[{name:"Re.",text:"具備柑橘與花香，並帶有果皮細微的特徵香氣。"}]},
+{id:9,en:"Benzyl Acetate",cn:"乙酸苯甲酯",note:["Top"],type:["Floral","Fruity"],alias:[],cas:"140-11-4",inci:"BENZYL ACETATE",ifra:"IFRA 第51版：純品無限制。EU 26種致敏原：leave-on≥0.01%須標示。FEMA 2135。",personal:"① 香蕉、百花、茉莉。\n② 微量動物感、甜，鼻腔中段。",advisors:[{name:"Re.",text:"應用於Jasmine與Muguet；Fruity中的Apple, Banana, Strawberry分類。"}]},
+{id:10,en:"Hedione",cn:"二氫茉莉酮酸甲酯",note:["Middle"],type:["Floral"],alias:["Methyl Dihydrojasmonate","MDJ"],cas:"24851-98-7",inci:"METHYL DIHYDROJASMONATE",ifra:"IFRA 第51版：無限制。FEMA 3408。典型用量2–15%（最高可達35%）。",personal:"① 透明感、清透水感。\n② 百花香，鼻腔中段。",advisors:[{name:"Re.",text:"具備果香特徵且甜甜的百花感。"}]},
+{id:11,en:"Ambrox Super",cn:"龍涎香",note:["Base"],type:["Woody","Animal","Amber"],alias:["Ambroxan","Ambroxide"],cas:"6790-58-5",inci:"AMBROXIDE",ifra:"IFRA 第51版：無限制（Cat.4）。FEMA 3471。典型用量0.1–5%。",personal:"① 辛辣感（較Hedione明顯），鼻腔中段。\n② 木質調。",advisors:[{name:"Re.",text:"呈現鹹感Amber（類獸內臟味）、海風感與鹹味。"}]},
+{id:12,en:"Calone 1951",cn:"西瓜酮",note:["Base"],type:["Marine","Fruity"],alias:["Oceanone"],cas:"28940-11-6",inci:"CALONE",ifra:"IFRA 第51版：無禁止規定。極強效，成品通常0.01–0.1%。",personal:"① 明亮、甜水果、水感，鼻腔中段。\n② 西瓜、清涼、海風感。",advisors:[{name:"Re.",text:"海洋水生調，帶有粉末狀質地與明亮感。"}]},
+{id:13,en:"Helional",cn:"新洋茉莉醛",note:["Middle"],type:["Marine","Floral"],alias:[],cas:"1205-17-0",inci:"HELIONAL",ifra:"IFRA 第51版：查無特定限制。建議用量0.1–2%。",personal:"① 亮、水感、洗淨感，鼻腔後段。\n② 花香、明亮感，如向日葵下的氣味。",advisors:[]},
+{id:14,en:"Ethyl Linalool",cn:"乙基芳樟醇",note:["Top","Middle"],type:["Floral"],alias:[],cas:"10339-55-6",inci:"ETHYL LINALOOL",ifra:"IFRA 第51版：本身無特定限制。注意：配方含Linalool為EU 26種致敏原。",personal:"① 強醇感（溶劑感）、花香、柑橘感，鼻腔前至中段。\n② 微量動物感、百花、微利（銳利邊緣）、枝幹感。",advisors:[{name:"Re.",text:"包含花莖、花朵與泥土的混合味道。"}]},
+{id:15,en:"Habanolide",cn:"大環麝香",note:["Base"],type:["Musky"],alias:["Globalide"],cas:"34902-57-3",inci:"HABANOLIDE",ifra:"IFRA 第51版：Cat.4最高48%。macrocyclic musk，生物降解性優。",personal:"① 麝香味，鼻腔中後段。\n② 白麝香、亮、乾、乾淨、亞麻感。",advisors:[{name:"Re.",text:"屬於黃葵類，具備白的、軟綿綿感，持香時間極長。"}]},
+{id:16,en:"Iso E Super",cn:"龍涎酮",note:["Base"],type:["Woody"],alias:["OTNE"],cas:"54464-57-2",inci:"TETRAMETHYL ACETYLOCTAHYDRONAPHTHALENES",ifra:"IFRA 第51版：Cat.4最高21.4%。IFF研發（1973），95%的香水配方使用。",personal:"① 空間感、礦物感、氣透力、透明感，鼻腔後段。\n② 木質、琥珀、細緻感。",advisors:[{name:"Re.",text:"具備雪松與紙張感，極其通用，95%的香水配方均會使用。"}]},
+{id:17,en:"Galaxolide",cn:"佳樂麝香",note:["Base"],type:["Musky"],alias:["HHCB"],cas:"1222-05-5",inci:"HEXAMETHYLINDANOPYRAN",ifra:"IFRA 第51版：Cat.4最高1.5%。水生毒性Aquatic Chronic 2；EPA列高優先TSCA物質。",personal:"① 乾淨的白麝香、甜感。\n② 蓬鬆感、粉質，鼻腔前段。",advisors:[{name:"Re.",text:"調香師通常混合多種麝香；99.9%的香水會加入麝香以強化持香度。"}]},
+{id:18,en:"Rose Oxide",cn:"玫瑰氧化物",note:["Middle"],type:["Floral","Fresh"],alias:["Rose Oxyde"],cas:"16726-11-7",inci:"ROSE OXIDE",ifra:"IFRA 第51版：有限制（皮膚致敏）。極強效，通常10%稀釋液，成品<0.1%。",personal:"① 綠葉感、微刺鼻，金屬感，鼻腔中段。\n② 強烈的新鮮感。",advisors:[{name:"Re.",text:"核心屬性為花香 (Rose)。"}]},
+{id:19,en:"Phenyl Ethyl Phenyl Acetate",cn:"苯乙酸苯乙酯",note:["Middle"],type:["Floral","Fruity"],alias:["PEPA"],cas:"102-20-5",inci:"PHENETHYL PHENYLACETATE",ifra:"IFRA 第51版：無特定限制。用量通常0.1–2%。",personal:"① (Top)香甜、蘋果、蜂蜜、荔枝。\n② (Middle)果酸、蘋果皮。\n③ (Base)蜂蜜、酸感。",advisors:[{name:"Re.",text:"具備顯著的梨子香氣特徵。"}]},
+{id:20,en:"Undercavertol",cn:"梨子/青蘋果感原料",note:["Top"],type:["Green","Fresh"],alias:[],cas:"67694-66-6",inci:"UNDERCAVERTOL",ifra:"IFRA 第51版：Givaudan專利，查無公開限制。建議向供應商索取合規聲明。",personal:"① 青蘋果皮、綠葉、衝感，鼻腔後段。\n② 冷然、綠色調。\n③ 微量動物感，持香度低。",advisors:[]},
+{id:21,en:"Phenyl Ethyl Acetate",cn:"乙酸苯乙酯",note:["Middle","Base"],type:["Floral"],alias:["Phenethyl Acetate"],cas:"103-45-7",inci:"PHENETHYL ACETATE",ifra:"IFRA 第51版：無特定限制。FEMA 2668。",personal:"① 蜂蜜感、甜潤感，鼻腔中段。\n② 水感、清脆感，如「蘋果脆脆地咬一口」。\n③ 木質、枝幹與花朵感。",advisors:[{name:"Re.",text:"作為「毛茉莉花」中的輕要素使用。"}]},
+{id:22,en:"Citronellol",cn:"香茅醇",note:["Middle","Base"],type:["Floral"],alias:["3,7-Dimethyl-6-octenol"],cas:"106-22-9",inci:"CITRONELLOL",ifra:"IFRA 第51版：有限制。Cat.4最高約7.4%。EU 26種致敏原：leave-on≥0.01%須標示。",personal:"① 花香、含鉛感、細緻質地，鼻腔前段。\n② 氣泡感。",advisors:[{name:"Re.",text:"呈現Rose, Geranium屬性，具備玫瑰花瓣感。"}]},
+{id:23,en:"Dimethyl Benzyl Carbinyl Acetate",cn:"乙酸二甲基苄基原酯",note:["Middle"],type:["Floral"],alias:["DMBCA","DBCA"],cas:"151-05-3",inci:"DIMETHYLBENZYL CARBINYL ACETATE",ifra:"IFRA 第51版：無特定限制。FEMA 2393。",personal:"① 銳利、水感、亞麻、亮、清、透明，鼻腔中段。\n② 微甜、果感、木質、冷感。",advisors:[{name:"Re.",text:"勾勒出玫瑰中的「綠色線條感」。"}]},
+{id:24,en:"Peonile",cn:"牡丹腈",note:["Middle"],type:["Floral","Green","Fresh"],alias:[],cas:"65405-84-7",inci:"PEONILE",ifra:"IFRA 第51版：有限制（IFRA STD），確切限量請查IFF供應商文件。",personal:"① 深沉、暗色調、融油劑感、輕微刺鼻，鼻腔中後段。\n② 深綠葉特徵。",advisors:[{name:"Re.",text:"此原料市場接受度高，建議可以多加利用。"}]},
+{id:25,en:"Javanol",cn:"爪哇檀香",note:["Base"],type:["Woody"],alias:[],cas:"155788-28-6",inci:"JAVANOL",ifra:"IFRA 第51版：Givaudan專利，Cat.4無公開限量。極強效，典型用量0.05–2%。",personal:"① 質地糯、味道淡，但持香時間極長。",advisors:[]},
+{id:26,en:"Sandalore",cn:"檀香醇",note:["Base"],type:["Woody"],alias:["Sandal Pentanol"],cas:"65113-99-7",inci:"SANDALORE",ifra:"IFRA 第51版：Cat.4成品最高1.2%。Givaudan研發。",personal:"① 淡淡檀木、奶糖味、自然感，持香時間長。",advisors:[]},
+{id:27,en:"Polysantol",cn:"高級檀香醇",note:["Base"],type:["Woody"],alias:["Santol Pentenol"],cas:"107898-54-4",inci:"TRIMETHYLCYCLOPENTENYL DIMETHYLISOPENTENOL",ifra:"IFRA 第51版：Cat.4成品最高1.1%。Firmenich研發，Samsara（Guerlain）中大量使用。",personal:"① 木質明亮感、甜、回甘，類似玫瑰木。",advisors:[{name:"Re.",text:"專用於高級檀香香調的調配。"}]},
+{id:28,en:"Beta Ionone",cn:"紫羅蘭酮",note:["Middle"],type:["Woody","Floral"],alias:["β-Ionone"],cas:"14901-07-6",inci:"BETA-IONONE",ifra:"IFRA 第51版：有限制，Cat.4限量請查最新IFRA文件。α-Ionone與β-Ionone需區分。",personal:"① 乾燥木質感、松木、松子感。",advisors:[{name:"Re.",text:"用於櫻花香調。注意：Ionone分為α與β，若使用不當（非高品質）會產生草臭味。"}]}
+];
+const BASES_80=[
+{id:1001,en:'Bitter Lemon',cn:'苦檸檬',note:['Top'],type:['香基','Citrus'],alias:['香基 01'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1002,en:'Citron Fruit',cn:'香櫞',note:['Top'],type:['香基','Citrus'],alias:['香基 02'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1003,en:'Grapefruit',cn:'葡萄柚',note:['Top'],type:['香基','Citrus'],alias:['香基 03'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1004,en:'Bergamot',cn:'佛手柑',note:['Top'],type:['香基','Citrus'],alias:['香基 04'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1005,en:'Yuzu',cn:'柚子',note:['Top'],type:['香基','Citrus'],alias:['香基 05'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1006,en:'Lime',cn:'萊姆',note:['Top'],type:['香基','Citrus'],alias:['香基 06'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1007,en:'Tangerine',cn:'橘子',note:['Top'],type:['香基','Citrus'],alias:['香基 07'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1008,en:'Orange',cn:'柳橙',note:['Top'],type:['香基','Citrus'],alias:['香基 08'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1009,en:'Cucumber',cn:'小黃瓜',note:['Top'],type:['香基','Fresh'],alias:['香基 09'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1010,en:'Fig',cn:'無花果',note:['Top'],type:['香基','Fruity'],alias:['香基 10'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1011,en:'Green Tea',cn:'綠茶',note:['Top'],type:['香基','Green'],alias:['香基 11'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1012,en:'Lily',cn:'百合',note:['Middle'],type:['香基','Floral'],alias:['香基 12'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1013,en:'Muguet',cn:'鈴蘭',note:['Middle'],type:['香基','Floral'],alias:['香基 13'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1014,en:'Jasmine',cn:'茉莉',note:['Middle'],type:['香基','Floral'],alias:['香基 14'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1015,en:'Tuberose',cn:'晚香玉',note:['Middle'],type:['香基','White Floral'],alias:['香基 15'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1016,en:'Rose',cn:'玫瑰',note:['Middle'],type:['香基','Floral'],alias:['香基 16'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1017,en:'Rose de Mai',cn:'五月玫瑰',note:['Middle'],type:['香基','Floral'],alias:['香基 17'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1018,en:'Ylang Ylang',cn:'依蘭',note:['Middle'],type:['香基','Floral'],alias:['香基 18'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1019,en:'Gardenia',cn:'梔子花',note:['Middle'],type:['香基','White Floral'],alias:['香基 19'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1020,en:'Geranium',cn:'天竺葵',note:['Middle'],type:['香基','Floral'],alias:['香基 20'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1021,en:'Freesia',cn:'小蒼蘭',note:['Middle'],type:['香基','Floral'],alias:['香基 21'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1022,en:'Violet',cn:'紫羅蘭',note:['Middle'],type:['香基','Powdery'],alias:['香基 22'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1023,en:'Magnolia',cn:'木蘭',note:['Middle'],type:['香基','Floral'],alias:['香基 23'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1024,en:'Lilac',cn:'丁香花',note:['Middle'],type:['香基','Floral'],alias:['香基 24'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1025,en:'Linden Blossom',cn:'椴樹花',note:['Middle'],type:['香基','Floral'],alias:['香基 25'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1026,en:'Orange Blossom',cn:'橙花',note:['Middle'],type:['香基','Floral'],alias:['香基 26'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1027,en:'Carnation',cn:'康乃馨',note:['Middle'],type:['香基','Floral'],alias:['香基 27'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1028,en:'Apple',cn:'蘋果',note:['Middle'],type:['香基','Fruity'],alias:['香基 28'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1029,en:'Raspberry',cn:'覆盆子',note:['Middle'],type:['香基','Fruity'],alias:['香基 29'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1030,en:'Cassis Fruit',cn:'黑醋栗果',note:['Middle'],type:['香基','Fruity'],alias:['香基 30'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1031,en:'Strawberry',cn:'草莓',note:['Middle'],type:['香基','Fruity'],alias:['香基 31'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1032,en:'Cherry',cn:'櫻桃',note:['Middle'],type:['香基','Fruity'],alias:['香基 32'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1033,en:'Riesling',cn:'麗絲玲葡萄酒感',note:['Middle'],type:['香基','Fruity'],alias:['香基 33'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1034,en:'Dewberry',cn:'黑莓類果實',note:['Middle'],type:['香基','Fruity'],alias:['香基 34'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1035,en:'Blackberry',cn:'黑莓',note:['Middle'],type:['香基','Fruity'],alias:['香基 35'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1036,en:'Lychee',cn:'荔枝',note:['Middle'],type:['香基','Fruity'],alias:['香基 36'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1037,en:'Apricot',cn:'杏桃',note:['Middle'],type:['香基','Fruity'],alias:['香基 37'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1038,en:'Pineapple',cn:'鳳梨',note:['Middle'],type:['香基','Fruity'],alias:['香基 38'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1039,en:'Mango',cn:'芒果',note:['Middle'],type:['香基','Fruity'],alias:['香基 39'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1040,en:'Peach',cn:'桃子',note:['Middle'],type:['香基','Fruity'],alias:['香基 40'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1041,en:'Pear',cn:'梨子',note:['Middle'],type:['香基','Fruity'],alias:['香基 41'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1042,en:'Tomato Leaf',cn:'番茄葉',note:['Middle'],type:['香基','Green'],alias:['香基 42'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1043,en:'Ivy',cn:'常春藤',note:['Middle'],type:['香基','Green'],alias:['香基 43'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1044,en:'Herb',cn:'草本',note:['Middle'],type:['香基','Herbal'],alias:['香基 44'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1045,en:'Rosemary',cn:'迷迭香',note:['Middle'],type:['香基','Herbal'],alias:['香基 45'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1046,en:'Lavender',cn:'薰衣草',note:['Middle'],type:['香基','Aromatic'],alias:['香基 46'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1047,en:'Green',cn:'綠葉調',note:['Middle'],type:['香基','Green'],alias:['香基 47'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1048,en:'Marine',cn:'海洋調',note:['Middle'],type:['香基','Marine'],alias:['香基 48'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1049,en:'Aldehyde',cn:'醛香',note:['Middle'],type:['香基','Aldehydic'],alias:['香基 49'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1050,en:'Cinnamon',cn:'肉桂',note:['Middle'],type:['香基','Spicy'],alias:['香基 50'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1051,en:'Ginger',cn:'薑',note:['Middle'],type:['香基','Spicy'],alias:['香基 51'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1052,en:'Balsam',cn:'香脂',note:['Middle'],type:['香基','Balsamic'],alias:['香基 52'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1053,en:'Spices',cn:'綜合辛香料',note:['Middle'],type:['香基','Spicy'],alias:['香基 53'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1054,en:'Sandalwood',cn:'檀香',note:['Base'],type:['香基','Woody'],alias:['香基 54'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1055,en:'Whitewood',cn:'白木質',note:['Base'],type:['香基','Woody'],alias:['香基 55'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1056,en:'Cedarwood',cn:'雪松',note:['Base'],type:['香基','Woody'],alias:['香基 56'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1057,en:'Rosewood',cn:'花梨木',note:['Base'],type:['香基','Woody'],alias:['香基 57'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1058,en:'Patchouli',cn:'廣藿香',note:['Base'],type:['香基','Woody'],alias:['香基 58'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1059,en:'Vetiver',cn:'岩蘭草',note:['Base'],type:['香基','Woody'],alias:['香基 59'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1060,en:'Hinoki',cn:'檜木',note:['Base'],type:['香基','Woody'],alias:['香基 60'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1061,en:'Oak',cn:'橡木',note:['Base'],type:['香基','Woody'],alias:['香基 61'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1062,en:'Musk',cn:'麝香',note:['Base'],type:['香基','Musky'],alias:['香基 62'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1063,en:'White Musk',cn:'白麝香',note:['Base'],type:['香基','Musky'],alias:['香基 63'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1064,en:'Amber',cn:'琥珀',note:['Base'],type:['香基','Amber'],alias:['香基 64'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1065,en:'White Amber',cn:'白琥珀',note:['Base'],type:['香基','Amber'],alias:['香基 65'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1066,en:'Civet Cat',cn:'靈貓感',note:['Base'],type:['香基','Animalic'],alias:['香基 66'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1067,en:'Beaver',cn:'海狸香感',note:['Base'],type:['香基','Animalic'],alias:['香基 67'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1068,en:'Leather',cn:'皮革',note:['Base'],type:['香基','Leathery'],alias:['香基 68'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1069,en:'Vanilla',cn:'香草',note:['Base'],type:['香基','Gourmand'],alias:['香基 69'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1070,en:'Coconut',cn:'椰子',note:['Base'],type:['香基','Gourmand'],alias:['香基 70'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1071,en:'Iris',cn:'鳶尾',note:['Base'],type:['香基','Powdery'],alias:['香基 71'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1072,en:'Orchid',cn:'蘭花',note:['Base'],type:['香基','Floral'],alias:['香基 72'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1073,en:'Tonka Bean',cn:'零陵香豆',note:['Base'],type:['香基','Gourmand'],alias:['香基 73'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1074,en:'Tobacco',cn:'菸草',note:['Base'],type:['香基','Tobacco'],alias:['香基 74'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1075,en:'Hay',cn:'乾草',note:['Base'],type:['香基','Dry'],alias:['香基 75'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1076,en:'Sampaquita',cn:'阿拉伯茉莉／菲律賓茉莉',note:['Base'],type:['香基','Floral'],alias:['香基 76'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1077,en:'Cacao',cn:'可可',note:['Base'],type:['香基','Gourmand'],alias:['香基 77'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1078,en:'Praline',cn:'糖漬堅果糖',note:['Base'],type:['香基','Gourmand'],alias:['香基 78'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1079,en:'Coffee',cn:'咖啡',note:['Base'],type:['香基','Gourmand'],alias:['香基 79'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]},
+{id:1080,en:'Moss',cn:'苔蘚',note:['Base'],type:['香基','Mossy'],alias:['香基 80'],cas:'',inci:'',ifra:'80 種 Olfaction 練習香材／香基，用於聞香訓練與香調辨識。',personal:'',advisors:[]}
+];
+const DEFAULT_DB=[...SEED,...BASES_80].map(x=>({...x, kind:(x.type||[]).includes('香基')?'香基':((x.type||[]).includes('精油')?'精油':'單體'), advisors:x.advisors||[]}));
+const DB_KEY='hfugue-organ-stable-db-v3-re-advisors-selects';
+const FORMULA_KEY='hfugue-organ-formulas-v2';
+const LEGACY_FORMULA_KEY='hfugue-organ-formula-v1';
+let db=[]; let activeNote=''; let activeKind=''; let currentId=null;
+function cleanLabel(s){return String(s??'').replace(new RegExp('k'+'p'+'i'+'a\\s*香基','gi'),'香基').replace(new RegExp('k'+'p'+'i'+'a','gi'),'香基');}
+function normalizeItem(x){x.en=cleanLabel(x.en);x.cn=cleanLabel(x.cn);x.type=(x.type||[]).map(cleanLabel);x.alias=(x.alias||[]).map(cleanLabel);x.ifra=cleanLabel(x.ifra);x.personal=cleanLabel(x.personal);if(!['單體','精油','香基'].includes(x.kind)){x.kind=(x.type||[]).includes('香基')?'香基':((x.type||[]).includes('精油')?'精油':'單體');}if(x.kind==='香基'&&!x.type.includes('香基'))x.type.unshift('香基');if(x.kind==='精油'&&!x.type.includes('精油'))x.type.unshift('精油');if(x.kind==='單體')x.type=x.type.filter(t=>t!=='香基'&&t!=='精油');x.advisors=x.advisors||[];return x;}
+function itemKey(x){return (x.en||'').toLowerCase()+'|'+(x.cn||'');}
+function loadDb(){
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem(DB_KEY)||'null');}catch(e){saved=null;}
+  const defaults=DEFAULT_DB.map(x=>normalizeItem({...x, note:[...(x.note||[])], type:[...(x.type||[])], alias:[...(x.alias||[])], advisors:(x.advisors||[]).map(a=>({...a}))}));
+  const defaultMap=new Map(defaults.map(x=>[itemKey(x),x]));
+  const incoming=(Array.isArray(saved)&&saved.length?saved:defaults).map(normalizeItem);
+  db=incoming.map(x=>{
+    const d=defaultMap.get(itemKey(x));
+    if(d){
+      if((!x.personal||!String(x.personal).trim()) && d.personal) x.personal=d.personal;
+      if((!x.advisors||!x.advisors.length) && d.advisors && d.advisors.length) x.advisors=d.advisors.map(a=>({...a,name:(a.name||'Re.').replace('韋老師','Re.')}));
+    }
+    x.advisors=(x.advisors||[]).map(a=>({...a,name:(a.name||'Re.').replace('韋老師','Re.')}));
+    return x;
+  });
+  const keys=new Set(db.map(itemKey));
+  defaults.forEach(d=>{if(!keys.has(itemKey(d))){db.push(d);keys.add(itemKey(d));}});
+  saveDb();
+}
+function saveDb(){localStorage.setItem(DB_KEY,JSON.stringify(db));}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function materialLabel(m){return `${m.en||''}${m.cn?'｜'+m.cn:''}${m.kind&&m.kind!=='單體'?'（'+m.kind+'）':''}`;}
+function sortedMaterials(){return [...db].sort((a,b)=>(a.en||'').localeCompare(b.en||'', 'en', {sensitivity:'base'}));}
+function populateScentFilter(){
+  const sel=document.getElementById('scentFilter');
+  if(!sel)return;
+  const current=sel.value||'';
+  const scents=[...new Set(db.flatMap(m=>(m.type||[])).map(cleanLabel).filter(t=>t&&t!=='單體'&&t!=='香基'&&t!=='精油'))].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));
+  sel.innerHTML='<option value="">全部香調</option>'+scents.map(s=>`<option value="${esc(s)}" ${s===current?'selected':''}>${esc(s)}</option>`).join('');
+  if(current && !scents.includes(current)) sel.value='';
+}
+function switchTab(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');event?.target?.classList.add('active'); if(id==='formula')renderFormula();}
+function toggleToolbar(){document.getElementById('toolbar').classList.toggle('collapsed');}
+function setNoteFilter(btn){document.querySelectorAll('[data-note]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeNote=btn.dataset.note||'';renderLibrary();}
+function setKindFilter(btn){const was=btn.classList.contains('active');document.querySelectorAll('[data-kind]').forEach(b=>b.classList.remove('active'));activeKind=was?'':btn.dataset.kind; if(!was)btn.classList.add('active');renderLibrary();}
+function sortMaterials(){renderLibrary();}
+function renderLibrary(){populateScentFilter();const q=(document.getElementById('searchInput')?.value||'').trim().toLowerCase();const sf=document.getElementById('scentFilter')?.value||'';let arr=sortedMaterials().filter(m=>{const types=(m.type||[]).map(cleanLabel);const hay=[m.en,m.cn,m.cas,m.inci,types.join(' '),(m.note||[]).join(' '),(m.alias||[]).join(' ')].join(' ').toLowerCase();return (!q||hay.includes(q))&&(!activeNote||(m.note||[]).includes(activeNote))&&(!activeKind||m.kind===activeKind)&&(!sf||types.includes(sf));});document.getElementById('countBadge').textContent=`${db.length} 種原料`;document.getElementById('materialGrid').innerHTML=arr.map(m=>`<div class="card"><div class="type">${esc(m.kind)}</div><div class="en">${esc(m.en)}</div><div class="cn">${esc(m.cn)}</div><div class="meta">${(m.note||[]).map(n=>`<span class="tag note">${esc(n)}</span>`).join('')}${(m.type||[]).slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="card-actions"><button class="mini" onclick="openDrawer(${m.id})">查看／編輯</button><button class="mini" onclick="addFormulaRow(${m.id});switchTabDirect('formula')">加入配方</button></div></div>`).join('')||'<div class="muted">沒有符合的原料</div>';}
+function switchTabDirect(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');document.querySelector(`.tab[onclick*="${id}"]`)?.classList.add('active');renderFormula();}
+function openDrawer(id){currentId=id;const m=db.find(x=>x.id===id);if(!m)return;document.getElementById('drawerTitle').textContent=m.en;document.getElementById('drawerSub').textContent=m.cn||'';document.getElementById('drawerContent').innerHTML=drawerHtml(m);document.getElementById('drawerBg').classList.add('open');}
+function closeDrawer(){document.getElementById('drawerBg').classList.remove('open');currentId=null;}
+function drawerBackdrop(e){if(e.target.id==='drawerBg')closeDrawer();}
+function scentChoices(){const preset=['Citrus','Fresh','Green','Floral','White Floral','Fruity','Woody','Amber','Musky','Animal','Animalic','Marine','Herbal','Aromatic','Spicy','Balsamic','Aldehydic','Powdery','Leathery','Gourmand','Tobacco','Tea','Resinous','Mossy','Dry'];const existing=db.flatMap(m=>(m.type||[])).map(cleanLabel).filter(t=>t&&t!=='香基'&&t!=='精油');return [...new Set([...preset,...existing])].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));}
+function selectOptions(list,selected=[]){const sel=selected.map(cleanLabel).filter(Boolean);return list.map(v=>`<option value="${esc(v)}" ${sel.includes(v)?'selected':''}>${esc(v)}</option>`).join('');}
+function selectedValues(id){return [...(document.getElementById(id)?.selectedOptions||[])].map(o=>cleanLabel(o.value)).filter(Boolean);}
+function choiceSummary(selected=[],fallback='選項'){const vals=(selected||[]).map(cleanLabel).filter(Boolean);return vals.length?'已選：'+vals.join(' / '):'點開選擇'+fallback;}
+function updateChoiceSummary(selectEl,fallback='選項'){const vals=[...(selectEl?.selectedOptions||[])].map(o=>cleanLabel(o.value)).filter(Boolean);const span=selectEl?.closest('.choice-collapse')?.querySelector('summary span');if(span)span.textContent=vals.length?'已選：'+vals.join(' / '):'點開選擇'+fallback;}
+function noteSelectHtml(selected=[]){return `<details class="choice-collapse"><summary><span>${esc(choiceSummary(selected,'前中後調'))}</span></summary><select class="choice-select" id="d_note_select" multiple size="3" onchange="updateChoiceSummary(this,'前中後調')">${selectOptions(['Top','Middle','Base'],selected)}</select><div class="choice-hint">可複選：電腦按 Ctrl / Cmd 點選；手機可直接在選單中勾選。</div></details>`;}
+function scentSelectHtml(selected=[]){const cleanSel=selected.map(cleanLabel).filter(t=>t&&t!=='香基'&&t!=='精油');return `<details class="choice-collapse"><summary><span>${esc(choiceSummary(cleanSel,'香調分類'))}</span></summary><select class="choice-select" id="d_type_select" multiple size="7" onchange="updateChoiceSummary(this,'香調分類')">${selectOptions(scentChoices(),cleanSel)}</select><input class="choice-other" id="d_type_other" placeholder="其他香調，可用逗號分隔，例如 Tea, Resinous"><div class="choice-hint">可複選；單體／精油／香基由「類型」欄位自動處理，不用在香調重複選。</div></details>`;}
+function drawerHtml(m){return `<div class="form-grid"><div class="fg"><label>英文名稱</label><input id="d_en" value="${esc(m.en)}"></div><div class="fg"><label>中文名稱</label><input id="d_cn" value="${esc(m.cn)}"></div><div class="fg"><label>類型</label><select id="d_kind"><option ${m.kind==='單體'?'selected':''}>單體</option><option ${m.kind==='精油'?'selected':''}>精油</option><option ${m.kind==='香基'?'selected':''}>香基</option></select></div><div class="fg full"><label>前中後調</label>${noteSelectHtml(m.note||[])}</div><div class="fg full"><label>香調分類</label>${scentSelectHtml(m.type||[])}</div><div class="fg"><label>CAS</label><input id="d_cas" value="${esc(m.cas)}"></div><div class="fg full"><label>INCI</label><input id="d_inci" value="${esc(m.inci)}"></div><div class="fg full"><label>IFRA / 合規備註</label><textarea id="d_ifra">${esc(m.ifra)}</textarea></div><div class="fg full"><label>我的聞香感受</label><textarea id="d_personal">${esc(m.personal)}</textarea></div><div class="fg full"><label>建議記錄</label><div id="advisorList">${renderAdvisors(m)}</div><button class="btn" onclick="addAdvisor()">＋ 新增建議者</button></div></div><div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn dark" onclick="saveDrawer()">儲存原料</button><button class="btn danger" onclick="deleteMaterial()">刪除原料</button></div>`;}
+function renderAdvisors(m){return (m.advisors||[]).map((a,i)=>`<div class="advisor"><div class="advisor-head"><input data-adv-name="${i}" value="${esc(a.name)}" placeholder="建議者姓名"><button class="mini" onclick="removeAdvisor(${i})">刪除</button></div><textarea data-adv-text="${i}" placeholder="填入建議內容…">${esc(a.text)}</textarea></div>`).join('')||'<div class="muted">尚無建議記錄</div>';}
+function saveDrawer(){const m=db.find(x=>x.id===currentId);if(!m)return;const selectedTypes=selectedValues('d_type_select');const otherTypes=(document.getElementById('d_type_other')?.value||'').split(',').map(x=>cleanLabel(x.trim())).filter(Boolean);Object.assign(m,{en:cleanLabel(d_en.value.trim()),cn:cleanLabel(d_cn.value.trim()),kind:d_kind.value,note:selectedValues('d_note_select'),type:[...new Set([...selectedTypes,...otherTypes])],cas:d_cas.value.trim(),inci:d_inci.value.trim(),ifra:cleanLabel(d_ifra.value),personal:cleanLabel(d_personal.value)});if(m.kind==='香基'&&!m.type.includes('香基'))m.type.unshift('香基');if(m.kind==='精油'&&!m.type.includes('精油'))m.type.unshift('精油');if(m.kind==='單體')m.type=m.type.filter(t=>t!=='香基'&&t!=='精油');m.advisors=[...document.querySelectorAll('[data-adv-name]')].map(inp=>{const i=inp.dataset.advName;return {name:(inp.value||'Re.').replace('韋老師','Re.'),text:document.querySelector(`[data-adv-text="${i}"]`).value};});normalizeItem(m);saveDb();renderLibrary();renderFormula();openDrawer(m.id);}
+function addAdvisor(){const m=db.find(x=>x.id===currentId);if(!m)return;m.advisors=m.advisors||[];m.advisors.push({name:'',text:''});document.getElementById('advisorList').innerHTML=renderAdvisors(m);}
+function removeAdvisor(i){const m=db.find(x=>x.id===currentId);if(!m)return;m.advisors.splice(i,1);document.getElementById('advisorList').innerHTML=renderAdvisors(m);}
+function deleteMaterial(){if(!currentId)return;if(confirm('確定刪除此原料？')){db=db.filter(x=>x.id!==currentId);saveDb();closeDrawer();renderLibrary();renderFormula();}}
+function openNewMaterial(){const id=Math.max(0,...db.map(x=>+x.id||0))+1;db.push({id,en:'New Material',cn:'',note:[],type:[],alias:[],cas:'',inci:'',ifra:'',personal:'',advisors:[],kind:'單體'});saveDb();renderLibrary();openDrawer(id);}
+let formulas=[];
+let activeFormulaId='';
+let rows=[];
+function uid(){return 'f_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+function emptyFormulaData(name='新香水配方'){
+  return {id:uid(),studentName:'',classSession:'',workName:name,perfumeCapacity:'10',perfumeConcentration:'20%',formulaDate:todayISO(),weather:'',temperature:'',quickNote:'',designNote:'',rows:Array.from({length:8},emptyFormulaRow)};
+}
+function currentFormula(){return formulas.find(f=>String(f.id)===String(activeFormulaId))||formulas[0];}
+function collectMetaFromDom(){
+  const ids=['studentName','classSession','workName','perfumeCapacity','perfumeConcentration','formulaDate','weather','temperature','quickNote','designNote'];
+  const out={};
+  ids.forEach(id=>{const el=document.getElementById(id); if(el)out[id]=el.value;});
+  return out;
+}
+function applyMetaToDom(f){
+  ['studentName','classSession','workName','perfumeCapacity','perfumeConcentration','formulaDate','weather','temperature','quickNote','designNote'].forEach(id=>{
+    const el=document.getElementById(id); if(el)el.value=(f&&f[id]!=null)?f[id]:'';
+  });
+}
+function saveActiveFormulaFromDom(){
+  const f=currentFormula(); if(!f||!document.getElementById('formulaRows'))return;
+  collectRowsFromDom(false);
+  Object.assign(f,collectMetaFromDom(),{rows:rows.map(r=>({...r}))});
+}
+function persistFormulas(){localStorage.setItem(FORMULA_KEY,JSON.stringify({activeFormulaId,formulas}));}
+function loadFormula(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(FORMULA_KEY)||'null');
+    if(saved&&Array.isArray(saved.formulas)&&saved.formulas.length){formulas=saved.formulas;activeFormulaId=saved.activeFormulaId||formulas[0].id;}
+  }catch(e){}
+  if(!formulas.length){
+    try{
+      const legacy=JSON.parse(localStorage.getItem(LEGACY_FORMULA_KEY)||'null');
+      if(legacy){
+        const f=emptyFormulaData(legacy.workName||'舊版配方');
+        Object.assign(f,legacy,{id:uid(),rows:(legacy.rows&&legacy.rows.length)?legacy.rows:Array.from({length:8},emptyFormulaRow)});
+        formulas=[f];activeFormulaId=f.id;
+      }
+    }catch(e){}
+  }
+  if(!formulas.length){const f=emptyFormulaData('香水配方 1');formulas=[f];activeFormulaId=f.id;}
+  const f=currentFormula();activeFormulaId=f.id;rows=(f.rows&&f.rows.length?f.rows:Array.from({length:8},emptyFormulaRow)).map(r=>({...emptyFormulaRow(),...r}));applyMetaToDom(f);persistFormulas();
+}
+function renderFormulaList(){
+  const sel=document.getElementById('formulaSelector'); if(!sel)return;
+  sel.innerHTML=formulas.map((f,i)=>`<option value="${esc(f.id)}" ${String(f.id)===String(activeFormulaId)?'selected':''}>${i+1}. ${esc(f.workName||'未命名配方')}</option>`).join('');
+  const count=document.getElementById('formulaCount'); if(count)count.textContent=`${formulas.length} 支配方`;
+}
+function selectFormula(id){
+  saveActiveFormulaFromDom();persistFormulas();
+  activeFormulaId=id;
+  const f=currentFormula(); if(!f)return;
+  activeFormulaId=f.id; rows=(f.rows&&f.rows.length?f.rows:Array.from({length:8},emptyFormulaRow)).map(r=>({...emptyFormulaRow(),...r}));
+  applyMetaToDom(f);renderFormulaList();renderFormula();
+}
+function newFormula(){
+  saveActiveFormulaFromDom();
+  const f=emptyFormulaData(`香水配方 ${formulas.length+1}`);
+  const shared=collectMetaFromDom();
+  f.studentName=shared.studentName||'';f.classSession=shared.classSession||'';f.weather=shared.weather||'';f.temperature=shared.temperature||'';
+  formulas.push(f);activeFormulaId=f.id;rows=f.rows.map(r=>({...r}));applyMetaToDom(f);persistFormulas();renderFormulaList();renderFormula();flash('已新增一支香水配方');
+}
+function duplicateFormula(){
+  saveActiveFormulaFromDom();const base=currentFormula();if(!base)return;
+  const copy=JSON.parse(JSON.stringify(base));copy.id=uid();copy.workName=(base.workName||'未命名配方')+' copy';
+  formulas.push(copy);activeFormulaId=copy.id;rows=copy.rows.map(r=>({...r}));applyMetaToDom(copy);persistFormulas();renderFormulaList();renderFormula();flash('已複製目前配方');
+}
+function deleteCurrentFormula(){
+  if(formulas.length<=1){flash('至少需要保留一支配方');return;}
+  const f=currentFormula(); if(!f)return;
+  if(!confirm(`確定刪除「${f.workName||'未命名配方'}」？`))return;
+  formulas=formulas.filter(x=>String(x.id)!==String(f.id));activeFormulaId=formulas[0].id;rows=formulas[0].rows.map(r=>({...emptyFormulaRow(),...r}));applyMetaToDom(formulas[0]);persistFormulas();renderFormulaList();renderFormula();flash('已刪除配方');
+}
+function materialOptions(selected){return '<option value="">選擇原料…</option>'+sortedMaterials().map(m=>`<option value="${m.id}" ${String(selected)===String(m.id)?'selected':''}>${esc(materialLabel(m))}</option>`).join('');}
+function emptyFormulaRow(){return {materialId:'',concentration:'10%',amount:'',unit:'g',reason:''};}
+function isFormulaRowEmpty(r){return !String(r.materialId||'').trim()&&!String(r.amount||'').trim()&&!String(r.reason||'').trim();}
+function addFormulaRow(mid=null,rerender=true){
+  if(mid){
+    const emptyIndex=rows.findIndex(isFormulaRowEmpty);
+    const next={materialId:mid,concentration:'10%',amount:'',unit:'g',reason:''};
+    if(emptyIndex>=0){rows[emptyIndex]=next;}else{rows.push(next);}
+  }else{
+    rows.push(emptyFormulaRow());
+  }
+  const f=currentFormula(); if(f)f.rows=rows.map(r=>({...r}));persistFormulas();
+  if(rerender)renderFormula();
+}
+function removeRow(i){rows.splice(i,1);const f=currentFormula();if(f)f.rows=rows.map(r=>({...r}));persistFormulas();renderFormula();}
+function parseConcentration(v){let s=String(v??'').trim();if(!s)return 100;s=s.replace('%','').trim();let n=parseFloat(s);if(!isFinite(n))return 100;if(n>0&&n<=1)n=n*100;return Math.max(0,n);}
+function num(v){const n=parseFloat(String(v??'').replace(',','.'));return isFinite(n)?n:0;}
+function rowWeight(r){return parseConcentration(r.concentration)*num(r.amount);}
+function collectRowsFromDom(updateActive=true){const trs=[...document.querySelectorAll('#formulaRows tr')];if(!trs.length)return;rows=trs.map(tr=>({materialId:tr.querySelector('.r-material').value,concentration:tr.querySelector('.r-conc').value,amount:tr.querySelector('.r-amount').value,unit:tr.querySelector('.r-unit').value,reason:tr.querySelector('.r-reason').value}));if(updateActive){const f=currentFormula();if(f)f.rows=rows.map(r=>({...r}));}}
+function recalc(){collectRowsFromDom();const totalG=rows.filter(r=>r.unit==='g').reduce((s,r)=>s+num(r.amount),0);const totalDrops=rows.filter(r=>r.unit==='滴').reduce((s,r)=>s+num(r.amount),0);const dropWeight=rows.filter(r=>r.unit==='滴').reduce((s,r)=>s+rowWeight(r),0);const cap=num(document.getElementById('perfumeCapacity').value);const fragrancePct=parseConcentration(document.getElementById('perfumeConcentration')?.value||'20%');const targetFragranceG=cap*fragrancePct/100;const mixed=totalG>0&&totalDrops>0;document.getElementById('mixWarn').classList.toggle('show',mixed);document.getElementById('totalG').textContent=totalG.toFixed(3).replace(/\.0+$/,'')+' g';document.getElementById('totalDrops').textContent=totalDrops.toFixed(1).replace(/\.0$/,'')+' 滴';document.getElementById('totalDropWeight').textContent=dropWeight.toFixed(2).replace(/\.00$/,'');document.getElementById('totalCapacity').textContent=cap.toFixed(2).replace(/\.00$/,'')+' g';if(document.getElementById('totalFragranceG'))document.getElementById('totalFragranceG').textContent=targetFragranceG.toFixed(3).replace(/\.0+$/,'')+' g';[...document.querySelectorAll('#formulaRows tr')].forEach((tr,i)=>{const r=rows[i];let pct=0;if(r.unit==='g')pct=totalG?num(r.amount)/totalG*100:0;else pct=dropWeight?rowWeight(r)/dropWeight*100:0;const targetG=pct&&targetFragranceG?targetFragranceG*pct/100:0;tr.querySelector('.r-percent').textContent=pct?pct.toFixed(2)+'%':'—';tr.querySelector('.r-target').textContent=targetG?targetG.toFixed(3)+' g':'—';r.rowPercent=pct?pct.toFixed(2)+'%':'';r.rowPercentNumber=pct;r.targetIngredientG=+targetG.toFixed(3);});storeFormulaState();}
+function renderFormula(){const tbody=document.getElementById('formulaRows');if(!tbody)return;renderFormulaList();tbody.innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td><select class="r-material" onchange="recalc()">${materialOptions(r.materialId)}</select></td><td><input class="r-conc narrow" value="${esc(r.concentration||'10%')}" oninput="recalc()" placeholder="10%"></td><td><input class="r-amount narrow" type="number" step="0.001" value="${esc(r.amount)}" oninput="recalc()" placeholder="0"></td><td><select class="r-unit" onchange="recalc()"><option ${r.unit==='g'?'selected':''}>g</option><option ${r.unit==='滴'?'selected':''}>滴</option></select></td><td class="calc r-percent">—</td><td class="calc r-target">—</td><td><input class="r-reason" value="${esc(r.reason)}" oninput="recalc()" placeholder="選用此原料的原因…"></td><td><button class="mini" onclick="removeRow(${i})">×</button></td></tr>`).join('');recalc();}
+function buildPayload(){const materialMap=Object.fromEntries(db.map(m=>[String(m.id),m]));const meta=collectMetaFromDom();const cap=num(meta.perfumeCapacity);const fragrancePct=parseConcentration(meta.perfumeConcentration||'20%');return {formulaId:activeFormulaId,studentName:meta.studentName,classSession:meta.classSession,workName:meta.workName,formulaDate:meta.formulaDate,weather:meta.weather,temperature:meta.temperature,quickNote:meta.quickNote,note:meta.designNote,perfumeCapacity:cap,perfumeConcentration:meta.perfumeConcentration||'',perfumeConcentrationPercent:fragrancePct,totals:{materialTotalG:num(totalG.textContent),materialTotalDrops:num(totalDrops.textContent),dropWeightTotal:num(totalDropWeight.textContent),perfumeCapacityG:cap,targetFragranceG:num(totalFragranceG?.textContent)},formula:rows.map((r,i)=>{const m=materialMap[String(r.materialId)]||{};return {index:i+1,materialId:r.materialId,materialEn:m.en||'',materialCn:m.cn||'',kind:m.kind||'',types:m.type||[],concentration:r.concentration,concentrationPercent:parseConcentration(r.concentration),amount:num(r.amount),unit:r.unit,rowPercent:r.rowPercent,rowPercentNumber:r.rowPercentNumber,targetIngredientG:r.targetIngredientG,reason:r.reason};})};}
+function buildAllPayload(){saveActiveFormulaFromDom();return {activeFormulaId,formulaCount:formulas.length,formulas:formulas.map(f=>{const oldId=activeFormulaId;const oldRows=rows;activeFormulaId=f.id;rows=(f.rows||[]).map(r=>({...emptyFormulaRow(),...r}));const payload={...f,rows:undefined,payload:buildPayload()};activeFormulaId=oldId;rows=oldRows;return payload;})};}
+function storeFormulaState(){if(!document.getElementById('studentName'))return;const f=currentFormula();if(f){Object.assign(f,collectMetaFromDom(),{rows:rows.map(r=>({...r}))});}persistFormulas();}
+function formulaPayload(){collectRowsFromDom();recalc();return buildPayload();}
+function saveFormula(show=true){collectRowsFromDom();recalc();storeFormulaState();if(show)flash('已儲存目前配方');}
+function flash(msg){const el=document.getElementById('submitMsg');el.textContent=msg;setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2500);}
+function downloadFormula(){const data=JSON.stringify(buildAllPayload(),null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='hfugue-formulas.json';a.click();URL.revokeObjectURL(a.href);}
+function importedRowFromPayload(row){return {materialId:row.materialId||'',concentration:row.concentration||'10%',amount:(row.amount!=null&&row.amount!==0)?String(row.amount):'',unit:row.unit||'g',reason:row.reason||''};}
+function importedFormulaFromPayload(item,index=0){const payload=item.payload||item;const rawRows=Array.isArray(item.rows)?item.rows:(Array.isArray(payload.formula)?payload.formula:[]);const f=emptyFormulaData(payload.workName||item.workName||`匯入配方 ${index+1}`);Object.assign(f,{id:item.id||payload.formulaId||uid(),studentName:payload.studentName||item.studentName||'',classSession:payload.classSession||item.classSession||'',workName:payload.workName||item.workName||`匯入配方 ${index+1}`,perfumeCapacity:String(payload.perfumeCapacity||item.perfumeCapacity||'10'),perfumeConcentration:payload.perfumeConcentration||item.perfumeConcentration||'20%',formulaDate:payload.formulaDate||item.formulaDate||todayISO(),weather:payload.weather||item.weather||'',temperature:payload.temperature||item.temperature||'',quickNote:payload.quickNote||item.quickNote||'',designNote:payload.note||item.designNote||''});f.rows=(rawRows.length?rawRows.map(importedRowFromPayload):Array.from({length:8},emptyFormulaRow));return f;}
+function normalizeImportedFormulas(data){if(!data)return [];if(Array.isArray(data.formulas))return data.formulas.map(importedFormulaFromPayload).filter(Boolean);if(Array.isArray(data.formula)||data.payload)return [importedFormulaFromPayload(data,0)];return [];}
+function applyImportedFormulas(imported){if(!imported.length){flash('這個 JSON 沒有可匯入的配方');return;}saveActiveFormulaFromDom();formulas=imported.map((f,i)=>({...f,id:f.id||uid(),workName:f.workName||`匯入配方 ${i+1}`}));activeFormulaId=formulas[0].id;rows=formulas[0].rows.map(r=>({...emptyFormulaRow(),...r}));applyMetaToDom(formulas[0]);persistFormulas();renderFormulaList();renderFormula();flash(`已匯入 ${formulas.length} 支配方`);}
+function importFormulaFile(event){const file=event.target.files&&event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);applyImportedFormulas(normalizeImportedFormulas(data));}catch(err){console.error(err);flash('JSON 格式無法讀取');}finally{event.target.value='';}};reader.readAsText(file,'utf-8');}
+
+async function submitFormula(){const endpoint=(window.HFUGUE_CONFIG&&window.HFUGUE_CONFIG.SUBMIT_ENDPOINT)||SUBMIT_FALLBACK;if(!endpoint){flash('尚未設定送出網址');return;}try{flash('送出中…');const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(buildAllPayload())});const txt=await res.text();flash('已送出所有配方給 Hana 老師');}catch(err){console.error(err);flash('送出失敗，請改下載 JSON 備份');}}
+function init(){loadDb();renderLibrary();loadFormula();renderFormulaList();renderFormula();}
+init();
+</script>
+<script>
+let deferredInstallPrompt=null;
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  deferredInstallPrompt=event;
+  const btn=document.getElementById('installAppBtn');
+  if(btn) btn.style.display='inline-block';
+});
+async function installApp(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null;
+  }else{
+    alert('請先將這個資料夾上傳到 GitHub Pages / Netlify / 你的網站，再用瀏覽器選單「安裝 App」或「加入主畫面」。本機 file:// 無法啟用 App 安裝。');
+  }
+}
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
