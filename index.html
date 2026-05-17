@@ -333,10 +333,37 @@ function duplicateFormula(){
   formulas.push(copy);activeFormulaId=copy.id;rows=copy.rows.map(r=>({...r}));applyMetaToDom(copy);persistFormulas();renderFormulaList();renderFormula();flash('已複製目前配方');
 }
 function deleteCurrentFormula(){
-  if(formulas.length<=1){flash('至少需要保留一支配方');return;}
   const f=currentFormula(); if(!f)return;
-  if(!confirm(`確定刪除「${f.workName||'未命名配方'}」？`))return;
-  formulas=formulas.filter(x=>String(x.id)!==String(f.id));activeFormulaId=formulas[0].id;rows=formulas[0].rows.map(r=>({...emptyFormulaRow(),...r}));applyMetaToDom(formulas[0]);persistFormulas();renderFormulaList();renderFormula();flash('已刪除配方');
+  const label=f.workName||'未命名配方';
+  let ok=true;
+  try{ ok=window.confirm(`確定刪除「${label}」？`); }catch(e){ ok=true; }
+  if(!ok)return;
+
+  // 若目前只剩一支配方，不能讓列表變成空陣列；改為清空並建立一支新的空白配方。
+  if(formulas.length<=1){
+    const fresh=emptyFormulaData('香水配方 1');
+    formulas=[fresh];
+    activeFormulaId=fresh.id;
+    rows=fresh.rows.map(r=>({...emptyFormulaRow(),...r}));
+    applyMetaToDom(fresh);
+    persistFormulas();
+    renderFormulaList();
+    renderFormula();
+    flash('已清空目前配方');
+    return;
+  }
+
+  const deleteIndex=formulas.findIndex(x=>String(x.id)===String(f.id));
+  formulas=formulas.filter(x=>String(x.id)!==String(f.id));
+  const nextIndex=Math.max(0,Math.min(deleteIndex,formulas.length-1));
+  const next=formulas[nextIndex]||formulas[0];
+  activeFormulaId=next.id;
+  rows=(next.rows&&next.rows.length?next.rows:Array.from({length:8},emptyFormulaRow)).map(r=>({...emptyFormulaRow(),...r}));
+  applyMetaToDom(next);
+  persistFormulas();
+  renderFormulaList();
+  renderFormula();
+  flash('已刪除配方');
 }
 function materialOptions(selected){return '<option value="">選擇原料…</option>'+sortedMaterials().map(m=>`<option value="${m.id}" ${String(selected)===String(m.id)?'selected':''}>${esc(materialLabel(m))}</option>`).join('');}
 function emptyFormulaRow(){return {materialId:'',concentration:'10%',amount:'',unit:'g',reason:''};}
