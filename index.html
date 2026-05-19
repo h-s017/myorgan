@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>H.Fugue 調香台 Organ｜Student App</title>
+<meta name="app-version" content="2026-05-20-formula-fix" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -69,8 +70,8 @@
       <div class="fg full"><label>香水設計敘述</label><textarea id="designNote" placeholder="描述這款香水的設計概念、情感氛圍、靈感來源、目標香調方向…"></textarea></div>
     </div>
     <div class="warn" id="mixWarn">提醒：同一張配方表同時使用 g 與滴數時，系統會分別依 g 與滴數組計算比例；建議同一份配方使用同一種記錄單位。</div>
-    <div class="table-wrap"><table><thead><tr><th>#</th><th class="name-col">原料</th><th>原料濃度</th><th>用量</th><th>單位</th><th>佔比 %</th><th>需要的原料 g</th><th class="reason-col">選用原因</th><th></th></tr></thead><tbody id="formulaRows"></tbody></table></div>
-    <div class="totals"><div class="total-box"><div class="total-label">香料總克數</div><div class="total-val" id="totalG">0 g</div></div><div class="total-box"><div class="total-label">香料總滴數</div><div class="total-val" id="totalDrops">0 滴</div></div><div class="total-box"><div class="total-label">濃度×用量加權總和</div><div class="total-val" id="totalDropWeight">0</div></div><div class="total-box"><div class="total-label">香水容量</div><div class="total-val" id="totalCapacity">0 g</div></div><div class="total-box"><div class="total-label">目標香料總量</div><div class="total-val" id="totalFragranceG">0 g</div></div></div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th class="name-col">原料</th><th>原料濃度</th><th>用量</th><th>單位</th><th>佔比 %</th><th>實際需秤 g</th><th class="reason-col">選用原因</th><th></th></tr></thead><tbody id="formulaRows"></tbody></table></div>
+    <div class="totals"><div class="total-box"><div class="total-label">香料實秤總克數</div><div class="total-val" id="totalG">0 g</div></div><div class="total-box"><div class="total-label">香料總滴數</div><div class="total-val" id="totalDrops">0 滴</div></div><div class="total-box"><div class="total-label">濃度×用量加權總和</div><div class="total-val" id="totalDropWeight">0</div></div><div class="total-box"><div class="total-label">香水容量</div><div class="total-val" id="totalCapacity">0 g</div></div><div class="total-box"><div class="total-label">目標香料總量</div><div class="total-val" id="totalFragranceG">0 g</div></div></div>
     <div><button class="btn" onclick="saveFormula()">儲存在本機</button> <button class="btn" onclick="downloadFormula()">下載 JSON</button> <button class="btn" onclick="document.getElementById('jsonUpload').click()">上傳 JSON</button> <input class="hidden-file" id="jsonUpload" type="file" accept="application/json,.json" onchange="importFormulaFile(event)"> <button class="btn dark" onclick="submitFormula()">送出給 Hana 老師</button><span class="submit-msg" id="submitMsg"></span></div>
   </div>
 </section>
@@ -388,47 +389,56 @@ function recalc(){
   collectRowsFromDom();
   const gRows=rows.filter(r=>r.unit==='g'&&num(r.amount)>0);
   const dropRows=rows.filter(r=>r.unit==='滴'&&num(r.amount)>0);
-  const totalG=gRows.reduce((s,r)=>s+num(r.amount),0);
+  const inputG=gRows.reduce((s,r)=>s+num(r.amount),0);
   const totalDrops=dropRows.reduce((s,r)=>s+num(r.amount),0);
   const gWeight=gRows.reduce((s,r)=>s+rowWeight(r),0);
   const dropWeight=dropRows.reduce((s,r)=>s+rowWeight(r),0);
   const cap=num(document.getElementById('perfumeCapacity').value);
   const fragrancePct=parseConcentration(document.getElementById('perfumeConcentration')?.value||'20%');
   const targetFragranceG=cap*fragrancePct/100;
-  const mixed=totalG>0&&totalDrops>0;
+  const mixed=inputG>0&&totalDrops>0;
+  let totalStockG=0;
   document.getElementById('mixWarn').classList.toggle('show',mixed);
   if(mixed){
-    document.getElementById('mixWarn').textContent='提醒：同一張配方表請統一使用 g 或滴數。g 與滴數無法直接合併成同一個比例分母，因此系統暫停計算「佔比 %」與「需要的原料 g」，避免總量被重複分配。';
+    document.getElementById('mixWarn').textContent='提醒：同一張配方表請統一使用 g 或滴數。g 與滴數不能直接合併成同一個比例分母；系統暫停計算「佔比 %」與「實際需秤 g」。';
   }
-  document.getElementById('totalG').textContent=totalG.toFixed(3).replace(/\.0+$/,'')+' g';
+  [...document.querySelectorAll('#formulaRows tr')].forEach((tr,i)=>{
+    const r=rows[i];
+    let pct=0;
+    let targetEffectiveG=0;
+    let requiredStockG=0;
+    const ingredientPct=parseConcentration(r.concentration);
+    const ingredientRatio=ingredientPct/100;
+    if(!mixed){
+      if(r.unit==='g'){
+        // g 模式：輸入的用量視為配方比例／份數；比例仍需依原料濃度換算有效香料量。
+        // 100% 原料在同樣用量下，有效香料量會是 10% 稀釋液的 10 倍。
+        pct=gWeight?rowWeight(r)/gWeight*100:0;
+      }else{
+        // 滴數模式：滴數同樣先乘上原料濃度，作為比例分配依據。
+        pct=dropWeight?rowWeight(r)/dropWeight*100:0;
+      }
+      targetEffectiveG=pct&&targetFragranceG?targetFragranceG*pct/100:0;
+      // targetEffectiveG 是「有效香料量」；requiredStockG 才是實際要秤的原料／稀釋液克數。
+      requiredStockG=ingredientRatio>0?targetEffectiveG/ingredientRatio:0;
+      totalStockG+=requiredStockG;
+    }
+    tr.querySelector('.r-percent').textContent=mixed?'請統一單位':(pct?pct.toFixed(2)+'%':'—');
+    tr.querySelector('.r-target').textContent=mixed?'—':(requiredStockG?requiredStockG.toFixed(3)+' g':'—');
+    r.rowPercent=(!mixed&&pct)?pct.toFixed(2)+'%':'';
+    r.rowPercentNumber=(!mixed&&pct)?pct:0;
+    r.targetEffectiveG=(!mixed&&targetEffectiveG)?+targetEffectiveG.toFixed(3):0;
+    r.targetIngredientG=(!mixed&&requiredStockG)?+requiredStockG.toFixed(3):0;
+  });
+  document.getElementById('totalG').textContent=(mixed?0:totalStockG).toFixed(3).replace(/\.0+$/,'')+' g';
   document.getElementById('totalDrops').textContent=totalDrops.toFixed(1).replace(/\.0$/,'')+' 滴';
   document.getElementById('totalDropWeight').textContent=(gWeight||dropWeight).toFixed(2).replace(/\.00$/,'');
   document.getElementById('totalCapacity').textContent=cap.toFixed(2).replace(/\.00$/,'')+' g';
   if(document.getElementById('totalFragranceG'))document.getElementById('totalFragranceG').textContent=targetFragranceG.toFixed(3).replace(/\.0+$/,'')+' g';
-  [...document.querySelectorAll('#formulaRows tr')].forEach((tr,i)=>{
-    const r=rows[i];
-    let pct=0;
-    let targetG=0;
-    if(!mixed){
-      if(r.unit==='g'){
-        // g 單位也必須納入「原料濃度」。
-        // 例：10% stock 與 100% stock 在同樣用量下，100% 的有效香料量應為 10 倍。
-        pct=gWeight?rowWeight(r)/gWeight*100:0;
-      }else{
-        pct=dropWeight?rowWeight(r)/dropWeight*100:0;
-      }
-      targetG=pct&&targetFragranceG?targetFragranceG*pct/100:0;
-    }
-    tr.querySelector('.r-percent').textContent=mixed?'請統一單位':(pct?pct.toFixed(2)+'%':'—');
-    tr.querySelector('.r-target').textContent=mixed?'—':(targetG?targetG.toFixed(3)+' g':'—');
-    r.rowPercent=(!mixed&&pct)?pct.toFixed(2)+'%':'';
-    r.rowPercentNumber=(!mixed&&pct)?pct:0;
-    r.targetIngredientG=(!mixed&&targetG)?+targetG.toFixed(3):0;
-  });
   storeFormulaState();
 }
 function renderFormula(){const tbody=document.getElementById('formulaRows');if(!tbody)return;renderFormulaList();tbody.innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td><select class="r-material" onchange="recalc()">${materialOptions(r.materialId)}</select></td><td><input class="r-conc narrow" value="${esc(r.concentration||'10%')}" oninput="recalc()" placeholder="10%"></td><td><input class="r-amount narrow" type="number" step="0.001" value="${esc(r.amount)}" oninput="recalc()" placeholder="0"></td><td><select class="r-unit" onchange="recalc()"><option ${r.unit==='g'?'selected':''}>g</option><option ${r.unit==='滴'?'selected':''}>滴</option></select></td><td class="calc r-percent">—</td><td class="calc r-target">—</td><td><input class="r-reason" value="${esc(r.reason)}" oninput="recalc()" placeholder="選用此原料的原因…"></td><td><button class="mini" onclick="removeRow(${i})">×</button></td></tr>`).join('');recalc();}
-function buildPayload(){const materialMap=Object.fromEntries(db.map(m=>[String(m.id),m]));const meta=collectMetaFromDom();const cap=num(meta.perfumeCapacity);const fragrancePct=parseConcentration(meta.perfumeConcentration||'20%');return {formulaId:activeFormulaId,studentName:meta.studentName,classSession:meta.classSession,workName:meta.workName,formulaDate:meta.formulaDate,weather:meta.weather,temperature:meta.temperature,quickNote:meta.quickNote,note:meta.designNote,perfumeCapacity:cap,perfumeConcentration:meta.perfumeConcentration||'',perfumeConcentrationPercent:fragrancePct,totals:{materialTotalG:num(totalG.textContent),materialTotalDrops:num(totalDrops.textContent),dropWeightTotal:num(totalDropWeight.textContent),perfumeCapacityG:cap,targetFragranceG:num(totalFragranceG?.textContent)},formula:rows.map((r,i)=>{const m=materialMap[String(r.materialId)]||{};return {index:i+1,materialId:r.materialId,materialEn:m.en||'',materialCn:m.cn||'',kind:m.kind||'',types:m.type||[],concentration:r.concentration,concentrationPercent:parseConcentration(r.concentration),amount:num(r.amount),unit:r.unit,rowPercent:r.rowPercent,rowPercentNumber:r.rowPercentNumber,targetIngredientG:r.targetIngredientG,reason:r.reason};})};}
+function buildPayload(){const materialMap=Object.fromEntries(db.map(m=>[String(m.id),m]));const meta=collectMetaFromDom();const cap=num(meta.perfumeCapacity);const fragrancePct=parseConcentration(meta.perfumeConcentration||'20%');return {formulaId:activeFormulaId,studentName:meta.studentName,classSession:meta.classSession,workName:meta.workName,formulaDate:meta.formulaDate,weather:meta.weather,temperature:meta.temperature,quickNote:meta.quickNote,note:meta.designNote,perfumeCapacity:cap,perfumeConcentration:meta.perfumeConcentration||'',perfumeConcentrationPercent:fragrancePct,totals:{materialTotalG:num(totalG.textContent),materialTotalDrops:num(totalDrops.textContent),dropWeightTotal:num(totalDropWeight.textContent),perfumeCapacityG:cap,targetFragranceG:num(totalFragranceG?.textContent)},formula:rows.map((r,i)=>{const m=materialMap[String(r.materialId)]||{};return {index:i+1,materialId:r.materialId,materialEn:m.en||'',materialCn:m.cn||'',kind:m.kind||'',types:m.type||[],concentration:r.concentration,concentrationPercent:parseConcentration(r.concentration),amount:num(r.amount),unit:r.unit,rowPercent:r.rowPercent,rowPercentNumber:r.rowPercentNumber,targetEffectiveG:r.targetEffectiveG||0,targetIngredientG:r.targetIngredientG,reason:r.reason};})};}
 function buildAllPayload(){saveActiveFormulaFromDom();return {activeFormulaId,formulaCount:formulas.length,formulas:formulas.map(f=>{const oldId=activeFormulaId;const oldRows=rows;activeFormulaId=f.id;rows=(f.rows||[]).map(r=>({...emptyFormulaRow(),...r}));const payload={...f,rows:undefined,payload:buildPayload()};activeFormulaId=oldId;rows=oldRows;return payload;})};}
 function storeFormulaState(){if(!document.getElementById('studentName'))return;const f=currentFormula();if(f){Object.assign(f,collectMetaFromDom(),{rows:rows.map(r=>({...r}))});}persistFormulas();}
 function formulaPayload(){collectRowsFromDom();recalc();return buildPayload();}
