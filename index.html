@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>H.Fugue 調香台 Organ｜Student App</title>
-<meta name="app-version" content="2026-05-20-formula-fix" />
+<meta name="app-version" content="2026-07-30-weighted-percentage-fix" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -383,7 +383,7 @@ function addFormulaRow(mid=null,rerender=true){
 function removeRow(i){rows.splice(i,1);const f=currentFormula();if(f)f.rows=rows.map(r=>({...r}));persistFormulas();renderFormula();}
 function parseConcentration(v){let s=String(v??'').trim();if(!s)return 100;s=s.replace('%','').trim();let n=parseFloat(s);if(!isFinite(n))return 100;if(n>0&&n<=1)n=n*100;return Math.max(0,n);}
 function num(v){const n=parseFloat(String(v??'').replace(',','.'));return isFinite(n)?n:0;}
-function rowWeight(r){return parseConcentration(r.concentration)*num(r.amount);}
+function rowWeight(r){return parseConcentration(r.concentration)/100*num(r.amount);}
 function collectRowsFromDom(updateActive=true){const trs=[...document.querySelectorAll('#formulaRows tr')];if(!trs.length)return;rows=trs.map(tr=>({materialId:tr.querySelector('.r-material').value,concentration:tr.querySelector('.r-conc').value,amount:tr.querySelector('.r-amount').value,unit:tr.querySelector('.r-unit').value,reason:tr.querySelector('.r-reason').value}));if(updateActive){const f=currentFormula();if(f)f.rows=rows.map(r=>({...r}));}}
 function recalc(){
   collectRowsFromDom();
