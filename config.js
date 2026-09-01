@@ -3,18 +3,18 @@ window.HFUGUE_CONFIG = {
   CLOUD_SYNC_URL: ""
 };
 
-// IFRA 分級擴充：保留原本 index.html，不改動既有原料與配方邏輯。
+// IFRA 分級擴充：首頁卡片只顯示顏色；完整分級與備註於「查看／編輯」中顯示。
 // 正式 IFRA Standard 類型：Prohibition / Restriction / Specification。
 // 「無特定標準、待供應商文件、待確認」為本資料庫的管理狀態，不是 IFRA 正式 Standard 類型。
 (() => {
   const IFRA_OPTIONS = [
     ['prohibition', '禁止｜Prohibition'],
+    ['restriction_specification', '限制＋規格｜Restriction + Specification'],
     ['restriction', '限制｜Restriction'],
     ['specification', '規格｜Specification'],
-    ['restriction_specification', '限制＋規格｜Restriction + Specification'],
-    ['no_specific_standard', '無特定標準'],
-    ['pending_supplier', '待供應商文件'],
-    ['unverified', '待確認']
+    ['no_specific_standard', '無特定標準｜No specific IFRA Standard'],
+    ['pending_supplier', '待供應商文件｜Pending supplier documentation'],
+    ['unverified', '待確認｜Unverified']
   ];
 
   const IFRA_LABELS = Object.fromEntries(IFRA_OPTIONS);
@@ -59,7 +59,8 @@ window.HFUGUE_CONFIG = {
 
   function statusCssClass(value) {
     if (value === 'prohibition') return 'ifra-prohibition';
-    if (value === 'restriction' || value === 'restriction_specification') return 'ifra-restriction';
+    if (value === 'restriction_specification') return 'ifra-restriction-specification';
+    if (value === 'restriction') return 'ifra-restriction';
     if (value === 'specification') return 'ifra-specification';
     if (value === 'no_specific_standard') return 'ifra-clear';
     if (value === 'pending_supplier') return 'ifra-pending';
@@ -71,13 +72,19 @@ window.HFUGUE_CONFIG = {
     const style = document.createElement('style');
     style.id = 'ifra-extension-styles';
     style.textContent = `
-      .tag.ifra-tag{font-weight:600;letter-spacing:.01em}
-      .tag.ifra-prohibition{background:#fff0ed;border-color:#e5aaa0;color:#9d3f31}
-      .tag.ifra-restriction{background:#fff7e8;border-color:#e7ca8b;color:#7a5a22}
-      .tag.ifra-specification{background:#eef3f8;border-color:#c8d4df;color:#40566b}
-      .tag.ifra-clear{background:#eef5ef;border-color:#c6d8c9;color:#47604b}
-      .tag.ifra-pending{background:#f4f1ea;border-color:#d8d0c1;color:#6d6253}
-      .tag.ifra-unverified{background:#f3f2ed;border-color:#ddd8ce;color:#77736c}
+      .ifra-dot{
+        width:10px;height:10px;border-radius:50%;display:inline-block;flex:0 0 10px;
+        border:1px solid rgba(0,0,0,.12);box-shadow:0 0 0 2px rgba(255,255,255,.75);
+      }
+      .ifra-prohibition{background:#d94b3d;border-color:#c23f33}
+      .ifra-restriction-specification{background:#e9902f;border-color:#d17d22}
+      .ifra-restriction{background:#e4c442;border-color:#caae2f}
+      .ifra-specification{background:#4e88bf;border-color:#3e75a6}
+      .ifra-clear{background:#5c9b67;border-color:#4c8757}
+      .ifra-pending{background:#9c9488;border-color:#817a70}
+      .ifra-unverified{background:#b8b5af;border-color:#96928b}
+      .ifra-detail-status{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:#fbfaf6;font-size:13px;color:var(--accent)}
+      .ifra-detail-status .ifra-dot{width:11px;height:11px;flex-basis:11px}
       .ifra-field-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:2px}
     `;
     document.head.appendChild(style);
@@ -117,18 +124,18 @@ window.HFUGUE_CONFIG = {
 
     const materials = currentFilteredMaterials();
     cards.forEach((card, index) => {
-      if (card.querySelector('.ifra-tag')) return;
+      if (card.querySelector('.ifra-dot')) return;
       const material = materials[index];
       if (!material) return;
 
       const value = ifraClass(material);
-      const badge = document.createElement('span');
-      badge.className = `tag ifra-tag ${statusCssClass(value)}`;
-      badge.textContent = `IFRA｜${(IFRA_LABELS[value] || '待確認').split('｜')[0]}`;
-      badge.title = material.ifra || IFRA_LABELS[value] || '待確認';
+      const dot = document.createElement('span');
+      dot.className = `ifra-dot ${statusCssClass(value)}`;
+      dot.setAttribute('aria-label', IFRA_LABELS[value] || '待確認');
+      dot.title = IFRA_LABELS[value] || '待確認';
 
       const meta = card.querySelector('.meta');
-      if (meta) meta.appendChild(badge);
+      if (meta) meta.appendChild(dot);
     });
   }
 
@@ -167,7 +174,8 @@ window.HFUGUE_CONFIG = {
     drawerHtml = function (material) {
       const html = baseDrawerHtml(material);
       const selected = ifraClass(material);
-      const field = `<div class="fg"><label>IFRA 分級</label><select id="d_ifra_class">${optionHtml(selected)}</select><div class="ifra-field-note">正式類型為禁止／限制／規格；複方香基請以供應商針對實際產品用途提供的 IFRA Certificate 為準。</div></div>`;
+      const label = IFRA_LABELS[selected] || '待確認｜Unverified';
+      const field = `<div class="fg full"><label>IFRA 分級</label><div class="ifra-detail-status"><span class="ifra-dot ${statusCssClass(selected)}"></span><strong>${label}</strong></div></div><div class="fg"><label>修改 IFRA 分級</label><select id="d_ifra_class">${optionHtml(selected)}</select><div class="ifra-field-note">正式類型為 Prohibition／Restriction／Specification；「無特定標準」不等於零風險。複方香基請以供應商針對實際產品用途提供的 IFRA Certificate 為準。</div></div>`;
       const target = '<div class="fg full"><label>IFRA / 合規備註</label>';
       return html.includes(target) ? html.replace(target, field + target) : html;
     };
@@ -184,7 +192,7 @@ window.HFUGUE_CONFIG = {
       return baseSaveDrawer.apply(this, arguments);
     };
 
-    // init() 在 index.html 內已先跑過一次；補跑以立即把分級顯示到卡片。
+    // init() 在 index.html 內已先跑過一次；補跑以立即把顏色狀態顯示到卡片。
     renderLibrary();
   }
 
