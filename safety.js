@@ -1,7 +1,14 @@
 (() => {
   const SOURCE = window.HFUGUE_SAFETY_DATA || { rows: [] };
   const SAFETY = new Map((SOURCE.rows || []).map(([id, cat4, cat9, cat10b, hazards, docs]) => [String(id), { cat4, cat9, cat10b, hazards, docs }]));
-  const CATEGORY_LABELS = SOURCE.categories || { cat4: '香水／留香型 Cat.4', cat9: '洗沐／沖洗型 Cat.9', cat10b: '空間噴霧 Cat.10B' };
+  const CATEGORY_LABELS = {
+    cat4: '香水／留香型 Cat.4',
+    cat5c: '護手霜 Cat.5C',
+    cat9: '洗沐／沖洗型 Cat.9',
+    cat10a: '擴香／Reed Diffuser Cat.10A',
+    cat10b: '空間噴霧 Cat.10B',
+    ...(SOURCE.categories || {})
+  };
 
   function injectStyles() {
     if (document.getElementById('formula-safety-styles')) return;
@@ -13,7 +20,7 @@
       .safety-title{font-weight:700}.safety-detail{font-size:12px;margin-top:3px;line-height:1.55}.safety-legal{font-size:11px;margin-top:6px;opacity:.8}
       .safety-cell{min-width:150px}.safety-badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;white-space:nowrap}
       .safety-badge.ok{background:#e5f1e7;color:#31543a}.safety-badge.near{background:#fff0c8;color:#765a20}.safety-badge.over,.safety-badge.prohibited{background:#f8d9d3;color:#8a3428}.safety-badge.review{background:#ece9e2;color:#665f55}
-      .safety-numbers{font-size:11px;color:var(--muted);line-height:1.45;margin-top:4px}.product-category{min-width:205px}
+      .safety-numbers{font-size:11px;color:var(--muted);line-height:1.45;margin-top:4px}.product-category{min-width:225px}
     `;
     document.head.appendChild(style);
   }
@@ -23,7 +30,7 @@
     if (top && !document.getElementById('productCategory')) {
       const field = document.createElement('div');
       field.className = 'fg';
-      field.innerHTML = `<label>產品類別／IFRA 類別</label><select id="productCategory" class="product-category" onchange="recalc()"><option value="cat4">香水／留香型 Cat.4</option><option value="cat9">洗沐／沖洗型 Cat.9</option><option value="cat10b">空間噴霧 Cat.10B</option></select>`;
+      field.innerHTML = `<label>產品類別／IFRA 類別</label><select id="productCategory" class="product-category" onchange="recalc()"><option value="">請選擇產品類別</option><option value="cat4">香水／留香型 Cat.4</option><option value="cat5c">護手霜 Cat.5C</option><option value="cat9">洗沐／沖洗型 Cat.9</option><option value="cat10a">擴香／Reed Diffuser Cat.10A</option><option value="cat10b">空間噴霧 Cat.10B</option></select>`;
       const concentration = document.getElementById('perfumeConcentration')?.closest('.fg');
       (concentration || top.lastElementChild)?.after(field);
     }
@@ -48,7 +55,7 @@
       const summary = document.createElement('div');
       summary.id = 'safetySummary';
       summary.className = 'safety-summary neutral';
-      summary.innerHTML = '<div class="safety-title">尚未輸入可檢核的配方</div><div class="safety-detail">選擇原料並輸入用量後，系統會即時計算。</div>';
+      summary.innerHTML = '<div class="safety-title">請先選擇產品類別</div><div class="safety-detail">產品類別會決定 IFRA 上限；未選擇前不進行合格／超量判定。</div>';
       wrap.before(summary);
     }
   }
@@ -61,12 +68,14 @@
   function evaluateRow(row, material, category, fragrancePct, mixed) {
     if (!row.materialId || !material || mixed || !(row.rowPercentNumber > 0)) return { level: 'review', blank: true, label: '—', detail: '' };
     const actual = row.rowPercentNumber * fragrancePct / 100;
+    if (!category) return { level: 'review', label: '⚪ 請先選類別', actual, limit: null, detail: '尚未選擇產品／IFRA 類別' };
     if (material.ifraClass === 'prohibition') return { level: 'prohibited', label: '🔴 禁止使用', actual, limit: 0, detail: 'IFRA 分級為 Prohibition' };
     const data = SAFETY.get(String(row.materialId));
     if (!data) return { level: 'review', label: '⚪ 待人工複核', actual, limit: null, detail: '尚未建立此原料的數值上限' };
     const limit = data[category];
     if (data.docs !== 'ready' || limit == null) {
-      const reason = data.docs === 'missing' ? '文件缺件' : 'IFRA 數值待複核';
+      let reason = data.docs === 'missing' ? '文件缺件' : 'IFRA 數值待複核';
+      if ((category === 'cat5c' || category === 'cat10a') && limit == null) reason = '此類別尚待匯入供應商 IFRA 上限';
       return { level: 'review', label: '⚪ ' + reason, actual, limit, hazards: data.hazards, detail: reason };
     }
     const usage = limit > 0 ? actual / limit * 100 : Infinity;
@@ -77,7 +86,7 @@
 
   function renderSafety() {
     ensureSafetyUI();
-    const category = document.getElementById('productCategory')?.value || 'cat4';
+    const category = document.getElementById('productCategory')?.value || '';
     const fragrancePct = parseConcentration(document.getElementById('perfumeConcentration')?.value || '20%');
     const hasG = rows.some(r => r.unit === 'g' && num(r.amount) > 0);
     const hasDrops = rows.some(r => r.unit === '滴' && num(r.amount) > 0);
@@ -94,16 +103,23 @@
       const usage = result.usage != null && Number.isFinite(result.usage) ? ` · 使用率 ${fmt(result.usage, 1)}` : '';
       const hazards = result.hazards > 0 ? `<br>MSDS：${result.hazards} 項危害聲明` : '';
       cell.innerHTML = `<span class="safety-badge ${result.level}">${result.label}</span><div class="safety-numbers">成品 ${fmt(result.actual)} · 上限 ${fmt(result.limit)}${usage}${hazards}</div>`;
-      row.safety = { category, categoryLabel: CATEGORY_LABELS[category], ...result };
+      row.safety = { category, categoryLabel: CATEGORY_LABELS[category] || '', ...result };
     });
     const active = results.filter(r => !r.blank);
+    const summary = document.getElementById('safetySummary');
+    if (!summary) return;
+
+    if (!category) {
+      summary.className = 'safety-summary neutral';
+      summary.innerHTML = '<div class="safety-title">請先選擇產品類別</div><div class="safety-detail">產品類別會決定 IFRA 上限；未選擇前不進行合格／超量判定。</div><div class="safety-legal">IFRA 51st：護手霜為 Cat.5C；擴香／reed diffuser 為 Cat.10A。</div>';
+      return;
+    }
+
     const counts = level => active.filter(r => r.level === level).length;
     const over = counts('over') + counts('prohibited');
     const near = counts('near');
     const review = counts('review');
     const ok = counts('ok');
-    const summary = document.getElementById('safetySummary');
-    if (!summary) return;
     let level = 'neutral', title = '尚未輸入可檢核的配方';
     if (active.length) {
       if (over) { level = 'over'; title = `🔴 配方未通過：${over} 項超量或禁止使用`; }
@@ -111,7 +127,7 @@
       else { level = 'ok'; title = '🟢 目前未發現 IFRA 超量'; }
     }
     summary.className = `safety-summary ${level}`;
-    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜通過 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}</div><div class="safety-legal">依 CW IFRA 51st 文件進行配方初篩；MSDS 危害聲明是操作與安評提醒，不等於毒性分數，也不取代台灣 PIF 與合格安全資料簽署人員評估。</div>`;
+    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜通過 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}</div><div class="safety-legal">依 CW IFRA 51st 文件進行配方初篩；Cat.5C／Cat.10A 若尚未匯入供應商數值會標示待複核，不以其他類別上限推算。MSDS 危害聲明是操作與安評提醒，不等於毒性分數，也不取代台灣 PIF 與合格安全資料簽署人員評估。</div>`;
   }
 
   function patchApp() {
@@ -122,7 +138,7 @@
     const baseCollectMeta = collectMetaFromDom;
     collectMetaFromDom = function () {
       const meta = baseCollectMeta.apply(this, arguments);
-      meta.productCategory = document.getElementById('productCategory')?.value || 'cat4';
+      meta.productCategory = document.getElementById('productCategory')?.value || '';
       return meta;
     };
     const baseApplyMeta = applyMetaToDom;
@@ -130,7 +146,7 @@
       const result = baseApplyMeta.apply(this, arguments);
       ensureSafetyUI();
       const select = document.getElementById('productCategory');
-      if (select) select.value = formula?.productCategory || 'cat4';
+      if (select) select.value = formula?.productCategory || '';
       return result;
     };
     const baseRecalc = recalc;
@@ -147,7 +163,7 @@
       return result;
     };
     const current = typeof currentFormula === 'function' ? currentFormula() : null;
-    if (current && !current.productCategory) current.productCategory = 'cat4';
+    if (current && typeof current.productCategory !== 'string') current.productCategory = '';
     renderFormula();
   }
 
