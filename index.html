@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>H.Fugue 調香台 Organ｜Student App</title>
-<meta name="app-version" content="2026-09-15-ifra-safety-check" />
+<meta name="app-version" content="2026-09-15-actual-concentration" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -32,8 +32,9 @@
 .formula-manager{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.formula-manager-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.formula-manager select{min-width:260px}.formula-count{font-size:12px;color:var(--muted)}
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fffefb} table{width:100%;border-collapse:collapse;min-width:1100px} th,td{border-bottom:1px solid var(--line);padding:9px;vertical-align:middle} th{font-size:12px;color:var(--muted);font-weight:600;text-align:left;background:#fbfaf6} td input,td select{width:100%;min-width:80px} .narrow{width:90px} .name-col{min-width:260px} .reason-col{min-width:230px}
 .calc{font-weight:600;color:var(--green)} .muted{color:var(--muted)} .totals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0} .total-box{border:1px solid var(--line);background:#fffefb;border-radius:14px;padding:12px} .total-label{font-size:12px;color:var(--muted)} .total-val{font-size:18px;font-weight:600;margin-top:2px}
+.actual-completion{border:1px solid var(--line);background:var(--soft);border-radius:16px;padding:14px;margin:0 0 14px}.actual-completion-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}.actual-completion-head strong{font-family:'DM Serif Display',serif;font-size:20px;font-weight:400}.actual-completion-head span,.actual-hint{font-size:12px;color:var(--muted)}.actual-completion-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}.actual-input{display:block}.actual-input input{width:100%;margin-top:6px;background:#fff}.actual-concentration{border-color:#aab8ad;background:#f7fbf7}.actual-concentration .total-val{color:var(--green)}.actual-hint{margin-top:8px}
 .warn{display:none;background:#fff7e8;border:1px solid #e9c986;color:#80602a;padding:10px 12px;border-radius:14px;margin-bottom:12px} .warn.show{display:block} .submit-msg{margin-left:10px;color:var(--muted);font-size:13px}
-@media(max-width:780px){.header{padding:14px 16px}.brand{font-size:22px}.tabs{top:66px;padding:0 10px}.panel{padding:16px}.recipe-top{grid-template-columns:1fr}.totals{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.section-title{font-size:26px}}
+@media(max-width:780px){.header{padding:14px 16px}.brand{font-size:22px}.tabs{top:66px;padding:0 10px}.panel{padding:16px}.recipe-top{grid-template-columns:1fr}.totals,.actual-completion-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.section-title{font-size:26px}}
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/logo-192.png">
@@ -72,6 +73,16 @@
     <div class="warn" id="mixWarn">提醒：同一張配方表同時使用 g 與滴數時，系統會分別依 g 與滴數組計算比例；建議同一份配方使用同一種記錄單位。</div>
     <div class="table-wrap"><table><thead><tr><th>#</th><th class="name-col">原料</th><th>原料濃度</th><th>用量</th><th>單位</th><th>佔比 %</th><th>實際需秤 g</th><th class="reason-col">選用原因</th><th></th></tr></thead><tbody id="formulaRows"></tbody></table></div>
     <div class="totals"><div class="total-box"><div class="total-label">香料實秤總克數</div><div class="total-val" id="totalG">0 g</div></div><div class="total-box"><div class="total-label">香料總滴數</div><div class="total-val" id="totalDrops">0 滴</div></div><div class="total-box"><div class="total-label">濃度×用量加權總和</div><div class="total-val" id="totalDropWeight">0</div></div><div class="total-box"><div class="total-label">香水容量</div><div class="total-val" id="totalCapacity">0 g</div></div><div class="total-box"><div class="total-label">目標香料總量</div><div class="total-val" id="totalFragranceG">0 g</div></div></div>
+    <div class="actual-completion">
+      <div class="actual-completion-head"><strong>實際完成後</strong><span>輸入實際秤重，自動計算完成濃度</span></div>
+      <div class="actual-completion-grid">
+        <label class="total-box actual-input"><span class="total-label">實際香精總量（g）</span><input id="actualFragranceG" type="number" min="0" step="0.001" inputmode="decimal" placeholder="留白＝採用上方總克數" oninput="recalc()"></label>
+        <label class="total-box actual-input"><span class="total-label">實際酒精／基底量（g）</span><input id="actualBaseG" type="number" min="0" step="0.001" inputmode="decimal" placeholder="請輸入實際加入量" oninput="recalc()"></label>
+        <div class="total-box"><div class="total-label">實際完成總重</div><div class="total-val" id="actualCompletedTotal">—</div></div>
+        <div class="total-box actual-concentration"><div class="total-label">實際完成濃度</div><div class="total-val" id="actualCompletedConcentration">—</div></div>
+      </div>
+      <div class="actual-hint">實際濃度＝實際香精總量 ÷（實際香精總量＋實際酒精／基底量）× 100%</div>
+    </div>
     <div><button class="btn" onclick="saveFormula()">儲存在本機</button> <button class="btn" onclick="downloadFormula()">下載 JSON</button> <button class="btn" onclick="document.getElementById('jsonUpload').click()">上傳 JSON</button> <input class="hidden-file" id="jsonUpload" type="file" accept="application/json,.json" onchange="importFormulaFile(event)"> <button class="btn dark" onclick="submitFormula()">送出給 Hana 老師</button><span class="submit-msg" id="submitMsg"></span></div>
   </div>
 </section>
@@ -273,17 +284,17 @@ let rows=[];
 function uid(){return 'f_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);}
 function todayISO(){return new Date().toISOString().slice(0,10);}
 function emptyFormulaData(name='新香水配方'){
-  return {id:uid(),studentName:'',classSession:'',workName:name,perfumeCapacity:'10',perfumeConcentration:'20%',formulaDate:todayISO(),weather:'',temperature:'',quickNote:'',designNote:'',rows:Array.from({length:8},emptyFormulaRow)};
+  return {id:uid(),studentName:'',classSession:'',workName:name,perfumeCapacity:'10',perfumeConcentration:'20%',actualFragranceG:'',actualBaseG:'',formulaDate:todayISO(),weather:'',temperature:'',quickNote:'',designNote:'',rows:Array.from({length:8},emptyFormulaRow)};
 }
 function currentFormula(){return formulas.find(f=>String(f.id)===String(activeFormulaId))||formulas[0];}
 function collectMetaFromDom(){
-  const ids=['studentName','classSession','workName','perfumeCapacity','perfumeConcentration','formulaDate','weather','temperature','quickNote','designNote'];
+  const ids=['studentName','classSession','workName','perfumeCapacity','perfumeConcentration','actualFragranceG','actualBaseG','formulaDate','weather','temperature','quickNote','designNote'];
   const out={};
   ids.forEach(id=>{const el=document.getElementById(id); if(el)out[id]=el.value;});
   return out;
 }
 function applyMetaToDom(f){
-  ['studentName','classSession','workName','perfumeCapacity','perfumeConcentration','formulaDate','weather','temperature','quickNote','designNote'].forEach(id=>{
+  ['studentName','classSession','workName','perfumeCapacity','perfumeConcentration','actualFragranceG','actualBaseG','formulaDate','weather','temperature','quickNote','designNote'].forEach(id=>{
     const el=document.getElementById(id); if(el)el.value=(f&&f[id]!=null)?f[id]:'';
   });
 }
@@ -398,6 +409,10 @@ function recalc(){
   const cap=num(document.getElementById('perfumeCapacity').value);
   const fragrancePct=parseConcentration(document.getElementById('perfumeConcentration')?.value||'20%');
   const targetFragranceG=cap*fragrancePct/100;
+  const actualFragranceEl=document.getElementById('actualFragranceG');
+  const actualBaseEl=document.getElementById('actualBaseG');
+  const hasActualFragrance=!!actualFragranceEl&&actualFragranceEl.value.trim()!=='';
+  const hasActualBase=!!actualBaseEl&&actualBaseEl.value.trim()!=='';
   const mixed=inputG>0&&totalDrops>0;
   let totalStockG=0;
   document.getElementById('mixWarn').classList.toggle('show',mixed);
@@ -437,10 +452,19 @@ function recalc(){
   document.getElementById('totalDropWeight').textContent=(gWeight||dropWeight).toFixed(2).replace(/\.00$/,'');
   document.getElementById('totalCapacity').textContent=cap.toFixed(2).replace(/\.00$/,'')+' g';
   if(document.getElementById('totalFragranceG'))document.getElementById('totalFragranceG').textContent=targetFragranceG.toFixed(3).replace(/\.0+$/,'')+' g';
+  const actualFragranceG=hasActualFragrance?num(actualFragranceEl.value):(mixed?0:totalStockG);
+  const actualBaseG=hasActualBase?num(actualBaseEl.value):0;
+  const actualCompletedG=actualFragranceG+actualBaseG;
+  const actualCompletedPct=actualCompletedG>0?actualFragranceG/actualCompletedG*100:0;
+  const canShowActual=hasActualBase&&actualCompletedG>0;
+  const actualTotalEl=document.getElementById('actualCompletedTotal');
+  const actualPctEl=document.getElementById('actualCompletedConcentration');
+  if(actualTotalEl)actualTotalEl.textContent=canShowActual?actualCompletedG.toFixed(3).replace(/\.?0+$/,'')+' g':'—';
+  if(actualPctEl)actualPctEl.textContent=canShowActual?actualCompletedPct.toFixed(3).replace(/\.?0+$/,'')+'%':'—';
   storeFormulaState();
 }
 function renderFormula(){const tbody=document.getElementById('formulaRows');if(!tbody)return;renderFormulaList();tbody.innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td><select class="r-material" onchange="recalc()">${materialOptions(r.materialId)}</select></td><td><input class="r-conc narrow" value="${esc(r.concentration||'10%')}" oninput="recalc()" placeholder="10%"></td><td><input class="r-amount narrow" type="number" step="0.001" value="${esc(r.amount)}" oninput="recalc()" placeholder="0"></td><td><select class="r-unit" onchange="recalc()"><option ${r.unit==='g'?'selected':''}>g</option><option ${r.unit==='滴'?'selected':''}>滴</option></select></td><td class="calc r-percent">—</td><td class="calc r-target">—</td><td><input class="r-reason" value="${esc(r.reason)}" oninput="recalc()" placeholder="選用此原料的原因…"></td><td><button class="mini" onclick="removeRow(${i})">×</button></td></tr>`).join('');recalc();}
-function buildPayload(){const materialMap=Object.fromEntries(db.map(m=>[String(m.id),m]));const meta=collectMetaFromDom();const cap=num(meta.perfumeCapacity);const fragrancePct=parseConcentration(meta.perfumeConcentration||'20%');return {formulaId:activeFormulaId,studentName:meta.studentName,classSession:meta.classSession,workName:meta.workName,formulaDate:meta.formulaDate,weather:meta.weather,temperature:meta.temperature,quickNote:meta.quickNote,note:meta.designNote,perfumeCapacity:cap,perfumeConcentration:meta.perfumeConcentration||'',perfumeConcentrationPercent:fragrancePct,totals:{materialTotalG:num(totalG.textContent),materialTotalDrops:num(totalDrops.textContent),dropWeightTotal:num(totalDropWeight.textContent),perfumeCapacityG:cap,targetFragranceG:num(totalFragranceG?.textContent)},formula:rows.map((r,i)=>{const m=materialMap[String(r.materialId)]||{};return {index:i+1,materialId:r.materialId,materialEn:m.en||'',materialCn:m.cn||'',kind:m.kind||'',types:m.type||[],concentration:r.concentration,concentrationPercent:parseConcentration(r.concentration),amount:num(r.amount),unit:r.unit,rowPercent:r.rowPercent,rowPercentNumber:r.rowPercentNumber,targetEffectiveG:r.targetEffectiveG||0,targetIngredientG:r.targetIngredientG,reason:r.reason};})};}
+function buildPayload(){const materialMap=Object.fromEntries(db.map(m=>[String(m.id),m]));const meta=collectMetaFromDom();const cap=num(meta.perfumeCapacity);const fragrancePct=parseConcentration(meta.perfumeConcentration||'20%');const actualFragranceInput=String(meta.actualFragranceG||'').trim();const actualFragranceG=actualFragranceInput===''?num(totalG.textContent):num(actualFragranceInput);const actualBaseG=num(meta.actualBaseG);const actualCompletedG=actualFragranceG+actualBaseG;const actualCompletedConcentrationPercent=actualCompletedG>0?actualFragranceG/actualCompletedG*100:0;return {formulaId:activeFormulaId,studentName:meta.studentName,classSession:meta.classSession,workName:meta.workName,formulaDate:meta.formulaDate,weather:meta.weather,temperature:meta.temperature,quickNote:meta.quickNote,note:meta.designNote,perfumeCapacity:cap,perfumeConcentration:meta.perfumeConcentration||'',perfumeConcentrationPercent:fragrancePct,actualFragranceG:meta.actualFragranceG||'',actualBaseG:meta.actualBaseG||'',actualCompletedG:+actualCompletedG.toFixed(3),actualCompletedConcentrationPercent:+actualCompletedConcentrationPercent.toFixed(3),totals:{materialTotalG:num(totalG.textContent),materialTotalDrops:num(totalDrops.textContent),dropWeightTotal:num(totalDropWeight.textContent),perfumeCapacityG:cap,targetFragranceG:num(totalFragranceG?.textContent),actualFragranceG:+actualFragranceG.toFixed(3),actualBaseG:+actualBaseG.toFixed(3),actualCompletedG:+actualCompletedG.toFixed(3),actualCompletedConcentrationPercent:+actualCompletedConcentrationPercent.toFixed(3)},formula:rows.map((r,i)=>{const m=materialMap[String(r.materialId)]||{};return {index:i+1,materialId:r.materialId,materialEn:m.en||'',materialCn:m.cn||'',kind:m.kind||'',types:m.type||[],concentration:r.concentration,concentrationPercent:parseConcentration(r.concentration),amount:num(r.amount),unit:r.unit,rowPercent:r.rowPercent,rowPercentNumber:r.rowPercentNumber,targetEffectiveG:r.targetEffectiveG||0,targetIngredientG:r.targetIngredientG,reason:r.reason};})};}
 function buildAllPayload(){saveActiveFormulaFromDom();return {activeFormulaId,formulaCount:formulas.length,formulas:formulas.map(f=>{const oldId=activeFormulaId;const oldRows=rows;activeFormulaId=f.id;rows=(f.rows||[]).map(r=>({...emptyFormulaRow(),...r}));const payload={...f,rows:undefined,payload:buildPayload()};activeFormulaId=oldId;rows=oldRows;return payload;})};}
 function storeFormulaState(){if(!document.getElementById('studentName'))return;const f=currentFormula();if(f){Object.assign(f,collectMetaFromDom(),{rows:rows.map(r=>({...r}))});}persistFormulas();}
 function formulaPayload(){collectRowsFromDom();recalc();return buildPayload();}
@@ -448,7 +472,7 @@ function saveFormula(show=true){collectRowsFromDom();recalc();storeFormulaState(
 function flash(msg){const el=document.getElementById('submitMsg');el.textContent=msg;setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2500);}
 function downloadFormula(){const data=JSON.stringify(buildAllPayload(),null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='hfugue-formulas.json';a.click();URL.revokeObjectURL(a.href);}
 function importedRowFromPayload(row){return {materialId:row.materialId||'',concentration:row.concentration||'10%',amount:(row.amount!=null&&row.amount!==0)?String(row.amount):'',unit:row.unit||'g',reason:row.reason||''};}
-function importedFormulaFromPayload(item,index=0){const payload=item.payload||item;const rawRows=Array.isArray(item.rows)?item.rows:(Array.isArray(payload.formula)?payload.formula:[]);const f=emptyFormulaData(payload.workName||item.workName||`匯入配方 ${index+1}`);Object.assign(f,{id:item.id||payload.formulaId||uid(),studentName:payload.studentName||item.studentName||'',classSession:payload.classSession||item.classSession||'',workName:payload.workName||item.workName||`匯入配方 ${index+1}`,perfumeCapacity:String(payload.perfumeCapacity||item.perfumeCapacity||'10'),perfumeConcentration:payload.perfumeConcentration||item.perfumeConcentration||'20%',formulaDate:payload.formulaDate||item.formulaDate||todayISO(),weather:payload.weather||item.weather||'',temperature:payload.temperature||item.temperature||'',quickNote:payload.quickNote||item.quickNote||'',designNote:payload.note||item.designNote||''});f.rows=(rawRows.length?rawRows.map(importedRowFromPayload):Array.from({length:8},emptyFormulaRow));return f;}
+function importedFormulaFromPayload(item,index=0){const payload=item.payload||item;const rawRows=Array.isArray(item.rows)?item.rows:(Array.isArray(payload.formula)?payload.formula:[]);const f=emptyFormulaData(payload.workName||item.workName||`匯入配方 ${index+1}`);Object.assign(f,{id:item.id||payload.formulaId||uid(),studentName:payload.studentName||item.studentName||'',classSession:payload.classSession||item.classSession||'',workName:payload.workName||item.workName||`匯入配方 ${index+1}`,perfumeCapacity:String(payload.perfumeCapacity||item.perfumeCapacity||'10'),perfumeConcentration:payload.perfumeConcentration||item.perfumeConcentration||'20%',actualFragranceG:String(payload.actualFragranceG??item.actualFragranceG??''),actualBaseG:String(payload.actualBaseG??item.actualBaseG??''),formulaDate:payload.formulaDate||item.formulaDate||todayISO(),weather:payload.weather||item.weather||'',temperature:payload.temperature||item.temperature||'',quickNote:payload.quickNote||item.quickNote||'',designNote:payload.note||item.designNote||''});f.rows=(rawRows.length?rawRows.map(importedRowFromPayload):Array.from({length:8},emptyFormulaRow));return f;}
 function normalizeImportedFormulas(data){if(!data)return [];if(Array.isArray(data.formulas))return data.formulas.map(importedFormulaFromPayload).filter(Boolean);if(Array.isArray(data.formula)||data.payload)return [importedFormulaFromPayload(data,0)];return [];}
 function applyImportedFormulas(imported){if(!imported.length){flash('這個 JSON 沒有可匯入的配方');return;}saveActiveFormulaFromDom();formulas=imported.map((f,i)=>({...f,id:f.id||uid(),workName:f.workName||`匯入配方 ${i+1}`}));activeFormulaId=formulas[0].id;rows=formulas[0].rows.map(r=>({...emptyFormulaRow(),...r}));applyMetaToDom(formulas[0]);persistFormulas();renderFormulaList();renderFormula();flash(`已匯入 ${formulas.length} 支配方`);}
 function importFormulaFile(event){const file=event.target.files&&event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);applyImportedFormulas(normalizeImportedFormulas(data));}catch(err){console.error(err);flash('JSON 格式無法讀取');}finally{event.target.value='';}};reader.readAsText(file,'utf-8');}
