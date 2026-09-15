@@ -3,9 +3,7 @@
   const SAFETY = new Map((SOURCE.rows || []).map(([id, cat4, cat9, cat10b, hazards, docs]) => [String(id), { cat4, cat9, cat10b, hazards, docs }]));
   const CATEGORY_LABELS = {
     cat4: '香水／留香型 Cat.4',
-    cat5c: '護手霜 Cat.5C',
     cat9: '洗沐／沖洗型 Cat.9',
-    cat10a: '擴香／Reed Diffuser Cat.10A',
     cat10b: '空間噴霧 Cat.10B',
     ...(SOURCE.categories || {})
   };
@@ -30,7 +28,7 @@
     if (top && !document.getElementById('productCategory')) {
       const field = document.createElement('div');
       field.className = 'fg';
-      field.innerHTML = `<label>產品類別／IFRA 類別</label><select id="productCategory" class="product-category" onchange="recalc()"><option value="">請選擇產品類別</option><option value="cat4">香水／留香型 Cat.4</option><option value="cat5c">護手霜 Cat.5C</option><option value="cat9">洗沐／沖洗型 Cat.9</option><option value="cat10a">擴香／Reed Diffuser Cat.10A</option><option value="cat10b">空間噴霧 Cat.10B</option></select>`;
+      field.innerHTML = `<label>產品類別／IFRA 類別</label><select id="productCategory" class="product-category" onchange="recalc()"><option value="">請選擇產品類別</option><option value="cat4">香水／留香型 Cat.4</option><option value="cat9">洗沐／沖洗型 Cat.9</option><option value="cat10b">空間噴霧 Cat.10B</option></select>`;
       const concentration = document.getElementById('perfumeConcentration')?.closest('.fg');
       (concentration || top.lastElementChild)?.after(field);
     }
@@ -74,8 +72,7 @@
     if (!data) return { level: 'review', label: '⚪ 待人工複核', actual, limit: null, detail: '尚未建立此原料的數值上限' };
     const limit = data[category];
     if (data.docs !== 'ready' || limit == null) {
-      let reason = data.docs === 'missing' ? '文件缺件' : 'IFRA 數值待複核';
-      if ((category === 'cat5c' || category === 'cat10a') && limit == null) reason = '此類別尚待匯入供應商 IFRA 上限';
+      const reason = data.docs === 'missing' ? '文件缺件' : 'IFRA 數值待複核';
       return { level: 'review', label: '⚪ ' + reason, actual, limit, hazards: data.hazards, detail: reason };
     }
     const usage = limit > 0 ? actual / limit * 100 : Infinity;
@@ -111,7 +108,7 @@
 
     if (!category) {
       summary.className = 'safety-summary neutral';
-      summary.innerHTML = '<div class="safety-title">請先選擇產品類別</div><div class="safety-detail">產品類別會決定 IFRA 上限；未選擇前不進行合格／超量判定。</div><div class="safety-legal">IFRA 51st：護手霜為 Cat.5C；擴香／reed diffuser 為 Cat.10A。</div>';
+      summary.innerHTML = '<div class="safety-title">請先選擇產品類別</div><div class="safety-detail">產品類別會決定 IFRA 上限；未選擇前不進行合格／超量判定。</div>';
       return;
     }
 
@@ -127,7 +124,7 @@
       else { level = 'ok'; title = '🟢 目前未發現 IFRA 超量'; }
     }
     summary.className = `safety-summary ${level}`;
-    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜通過 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}</div><div class="safety-legal">依 CW IFRA 51st 文件進行配方初篩；Cat.5C／Cat.10A 若尚未匯入供應商數值會標示待複核，不以其他類別上限推算。MSDS 危害聲明是操作與安評提醒，不等於毒性分數，也不取代台灣 PIF 與合格安全資料簽署人員評估。</div>`;
+    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜通過 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}</div><div class="safety-legal">依 CW IFRA 51st 文件進行配方初篩；MSDS 危害聲明是操作與安評提醒，不等於毒性分數，也不取代適用產品法規與完整安全評估。</div>`;
   }
 
   function patchApp() {
