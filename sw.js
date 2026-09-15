@@ -1,9 +1,11 @@
-const CACHE_NAME = 'hfugue-organ-app-v20260520-cloud-sync-v1';
+const CACHE_NAME = 'hfugue-organ-app-v20260915-safety-v1';
 const APP_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './config.js',
+  './safety-data.js',
+  './safety.js',
   './icons/logo-192.png',
   './icons/logo-512.png'
 ];
