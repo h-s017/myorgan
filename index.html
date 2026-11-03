@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>H.Fugue 調香台 Organ｜Student App</title>
-<meta name="app-version" content="2026-09-15-actual-concentration" />
+<title>HANA 調香台 Organ｜Master</title>
+<meta name="app-version" content="2026-11-04-master-unified" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -44,10 +44,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
-<header class="header"><div class="brand"><a href="https://www.hanascent.com/" target="_blank" rel="noopener">調香台 Organ<small>H.Fugue Atelier · by Hana</small></a></div><div class="top-actions"><span class="pill" id="countBadge">0 種原料</span><button class="btn" id="installAppBtn" onclick="installApp()">下載成 App</button><button class="btn gold" onclick="openNewMaterial()">＋ 新增原料</button></div></header>
+<header class="header"><div class="brand"><a href="https://www.hanascent.com/" target="_blank" rel="noopener">調香台 Organ<small>HANA SCENT ARTIST · MASTER</small></a></div><div class="top-actions"><span class="pill">MASTER</span><span class="pill" id="countBadge">0 種原料</span><button class="btn" id="installAppBtn" onclick="installApp()">下載成 App</button><button class="btn gold" onclick="openNewMaterial()">＋ 新增原料</button></div></header>
 <nav class="tabs"><button class="tab active" onclick="switchTab('library')">單體／香基庫</button><button class="tab" onclick="switchTab('formula')">調香配方表</button></nav>
 <section class="panel active" id="panel-library">
-  <div class="toolbar-head"><div><div class="section-title">單體／香基庫</div><div class="section-sub">單體原料與 80 種香基合併管理；香基字樣已統一。</div></div><button class="btn" onclick="toggleToolbar()">收合／展開搜尋</button></div>
+  <div class="toolbar-head"><div><div class="section-title">單體／香基庫</div><div class="section-sub">主資料庫：單體、精油與 CW / KPIA 80 種香基；IFRA 與安全規則以此版本為主源。</div></div><button class="btn" onclick="toggleToolbar()">收合／展開搜尋</button></div>
   <div class="toolbar" id="toolbar"><div class="search"><input id="searchInput" placeholder="搜尋英文、中文、香調、CAS…" oninput="renderLibrary()"></div><select id="scentFilter" onchange="renderLibrary()" style="min-width:150px" aria-label="香調篩選"><option value="">全部香調</option></select><button class="chip active" data-note="" onclick="setNoteFilter(this)">全部</button><button class="chip" data-note="Top" onclick="setNoteFilter(this)">Top</button><button class="chip" data-note="Middle" onclick="setNoteFilter(this)">Middle</button><button class="chip" data-note="Base" onclick="setNoteFilter(this)">Base</button><button class="chip" data-kind="單體" onclick="setKindFilter(this)">單體</button><button class="chip" data-kind="精油" onclick="setKindFilter(this)">精油</button><button class="chip" data-kind="香基" onclick="setKindFilter(this)">香基</button><button class="chip" onclick="sortMaterials()">英文 A–Z</button></div>
   <div class="grid" id="materialGrid"></div>
 </section>
@@ -59,8 +59,8 @@
   </div>
   <div class="recipe-card">
     <div class="recipe-top">
-      <div class="fg"><label>學生姓名</label><input id="studentName" placeholder="姓名"></div>
-      <div class="fg"><label>課程場次</label><input id="classSession" placeholder="例如 2026/05/xx"></div>
+      <div class="fg"><label>調製者</label><input id="studentName" placeholder="姓名"></div>
+      <div class="fg"><label>專案／場次</label><input id="classSession" placeholder="例如 鈴蘭花型 / 2026-11"></div>
       <div class="fg"><label>作品名稱</label><input id="workName" placeholder="香水名稱"></div>
       <div class="fg"><label>香水容量（g）</label><input id="perfumeCapacity" type="number" step="0.01" value="10" oninput="recalc()"></div>
       <div class="fg"><label>香水濃度百分比</label><input id="perfumeConcentration" type="text" value="20%" oninput="recalc()" placeholder="20%"></div>
