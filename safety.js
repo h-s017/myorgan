@@ -1,6 +1,5 @@
 (() => {
   const SOURCE = window.HFUGUE_SAFETY_DATA || { rows: [] };
-  const SAFETY = new Map((SOURCE.rows || []).map(([id, cat4, cat9, cat10b, hazards, docs]) => [String(id), { cat4, cat9, cat10b, hazards, docs }]));
   const CATEGORY_LABELS = {
     cat4: '香水／留香型 Cat.4',
     cat9: '洗沐／沖洗型 Cat.9',
@@ -38,7 +37,7 @@
       if (header && !header.querySelector('.safety-head')) {
         const th = document.createElement('th');
         th.className = 'safety-head';
-        th.textContent = '即時安全檢核';
+        th.textContent = 'IFRA 配方初篩';
         header.insertBefore(th, header.children[7] || null);
       }
       [...table.querySelectorAll('tbody tr')].forEach(tr => {
@@ -63,24 +62,6 @@
     return Number(value).toFixed(digits).replace(/\.?0+$/, '') + '%';
   }
 
-  function evaluateRow(row, material, category, fragrancePct, mixed) {
-    if (!row.materialId || !material || mixed || !(row.rowPercentNumber > 0)) return { level: 'review', blank: true, label: '—', detail: '' };
-    const actual = row.rowPercentNumber * fragrancePct / 100;
-    if (!category) return { level: 'review', label: '⚪ 請先選類別', actual, limit: null, detail: '尚未選擇產品／IFRA 類別' };
-    if (material.ifraClass === 'prohibition') return { level: 'prohibited', label: '🔴 禁止使用', actual, limit: 0, detail: 'IFRA 分級為 Prohibition' };
-    const data = SAFETY.get(String(row.materialId));
-    if (!data) return { level: 'review', label: '⚪ 待人工複核', actual, limit: null, detail: '尚未建立此原料的數值上限' };
-    const limit = data[category];
-    if (data.docs !== 'ready' || limit == null) {
-      const reason = data.docs === 'missing' ? '文件缺件' : 'IFRA 數值待複核';
-      return { level: 'review', label: '⚪ ' + reason, actual, limit, hazards: data.hazards, detail: reason };
-    }
-    const usage = limit > 0 ? actual / limit * 100 : Infinity;
-    if (usage > 100) return { level: 'over', label: '🔴 超量', actual, limit, usage, hazards: data.hazards };
-    if (usage >= 80) return { level: 'near', label: '🟡 接近上限', actual, limit, usage, hazards: data.hazards };
-    return { level: 'ok', label: '🟢 未超量', actual, limit, usage, hazards: data.hazards };
-  }
-
   function renderSafety() {
     ensureSafetyUI();
     const category = document.getElementById('productCategory')?.value || '';
@@ -88,19 +69,21 @@
     const hasG = rows.some(r => r.unit === 'g' && num(r.amount) > 0);
     const hasDrops = rows.some(r => r.unit === '滴' && num(r.amount) > 0);
     const mixed = hasG && hasDrops;
-    const materials = new Map(db.map(m => [String(m.id), m]));
-    const results = [];
+    const results = HFUGUE_FORMULA_SAFETY.evaluateRows(rows, db, category, fragrancePct, {
+      mixed, drops:hasDrops,
+      invalidConcentration:!HFUGUE_FORMULA_SAFETY.validConcentration(document.getElementById('perfumeConcentration')?.value)
+    });
     [...document.querySelectorAll('#formulaRows tr')].forEach((tr, index) => {
       const row = rows[index];
-      const result = evaluateRow(row, materials.get(String(row.materialId)), category, fragrancePct, mixed);
-      results.push(result);
+      const result = results[index];
       const cell = tr.querySelector('.safety-cell');
       if (!cell) return;
+      row.safety = { category, categoryLabel: CATEGORY_LABELS[category] || '', ...result };
       if (result.blank) { cell.innerHTML = '<span class="muted">—</span>'; return; }
       const usage = result.usage != null && Number.isFinite(result.usage) ? ` · 使用率 ${fmt(result.usage, 1)}` : '';
       const hazards = result.hazards > 0 ? `<br>MSDS：${result.hazards} 項危害聲明` : '';
-      cell.innerHTML = `<span class="safety-badge ${result.level}">${result.label}</span><div class="safety-numbers">成品 ${fmt(result.actual)} · 上限 ${fmt(result.limit)}${usage}${hazards}</div>`;
-      row.safety = { category, categoryLabel: CATEGORY_LABELS[category] || '', ...result };
+      const aggregate = result.aggregateActual != null ? ` · 同成分合計 ${fmt(result.aggregateActual)}` : '';
+      cell.innerHTML = `<span class="safety-badge ${result.level}">${result.label}</span><div class="safety-numbers">目標成品 ${fmt(result.actual)}${aggregate} · 上限 ${fmt(result.limit)}${usage}${hazards}<br>${esc(result.detail || "")}</div>`;
     });
     const active = results.filter(r => !r.blank);
     const summary = document.getElementById('safetySummary');
@@ -124,7 +107,7 @@
       else { level = 'ok'; title = '🟢 目前未發現 IFRA 超量'; }
     }
     summary.className = `safety-summary ${level}`;
-    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜通過 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}</div><div class="safety-legal">依 CW IFRA 51st 文件進行配方初篩；MSDS 危害聲明是操作與安評提醒，不等於毒性分數，也不取代適用產品法規與完整安全評估。</div>`;
+    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜數值未超量 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}</div><div class="safety-legal">依 CW 文件與 IFRA 第51次修訂單體資料，按目標有效香料濃度初篩；同成分各列已加總。未計入複方中未知成分貢獻，實際秤重、原料規格與成品法規仍需複核。</div>`;
   }
 
   function patchApp() {
@@ -167,3 +150,4 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', patchApp, { once: true });
   else setTimeout(patchApp, 0);
 })();
+

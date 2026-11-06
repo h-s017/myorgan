@@ -99,3 +99,691 @@ window.HFUGUE_SAFETY_DATA.materialNames={
   "1080": "Moss"
 };
 window.HFUGUE_SAFETY_DATA.provenance={repository:"https://github.com/h-s017/myorgan/blob/main/safety-data.js",commit:"main",reviewed:"2026-09",amendment:"51st",scope:"CW Perfumery Atlas / KPIA 80"};
+
+
+// Pure single molecules: limits are finished-product w/w %, never substitute CW base limits.
+window.HFUGUE_SAFETY_DATA.singleMoleculeRevision="2026-11-07-v1";
+window.HFUGUE_SAFETY_DATA.singleMolecules=[
+  {
+    "en": "Cis-3 Hexenyl Acetate",
+    "cn": "乙酸葉醇酯",
+    "cas": "3681-71-8",
+    "inci": "CIS-3-HEXENYL ACETATE",
+    "id": 3001,
+    "note": [
+      "Top"
+    ],
+    "type": [
+      "Green",
+      "Fruity"
+    ],
+    "alias": [
+      "cis-3-Hexen-1-yl acetate",
+      "Hexenyl Acetate"
+    ],
+    "odor": "青綠葉片、青香蕉皮、蘋果與梨；增加鮮活的果綠感。",
+    "accords": "綠葉、鈴蘭、玫瑰、茉莉、蘋果、梨",
+    "usage": [
+      0.05,
+      1
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      }
+    ],
+    "ifraClass": "no_specific_standard",
+    "ifra": "IFRA 第51次修訂索引：未查得獨立數值限量標準。不代表可直接接觸皮膚或免除成品安全評估；仍須核對供應商規格。",
+    "limits": null,
+    "specification": ""
+  },
+  {
+    "en": "Benzyl Acetate",
+    "cn": "乙酸苄酯",
+    "cas": "140-11-4",
+    "inci": "BENZYL ACETATE",
+    "id": 9,
+    "note": [
+      "Top",
+      "Middle"
+    ],
+    "type": [
+      "Floral",
+      "Fruity"
+    ],
+    "alias": [
+      "Phenylmethyl acetate"
+    ],
+    "odor": "明亮甜白花，帶梨與香蕉感；增加花香擴散及果香頂部。",
+    "accords": "茉莉、依蘭、梔子、白花、果香",
+    "usage": [
+      1,
+      15
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      }
+    ],
+    "ifraClass": "no_specific_standard",
+    "ifra": "IFRA 第51次修訂索引：未查得獨立數值限量標準。不代表可直接接觸皮膚或免除成品安全評估；仍須核對供應商規格。",
+    "limits": null,
+    "specification": ""
+  },
+  {
+    "en": "Benzyl Salicylate",
+    "cn": "水楊酸苄酯",
+    "cas": "118-58-1",
+    "inci": "BENZYL SALICYLATE",
+    "id": 3002,
+    "note": [
+      "Middle",
+      "Base"
+    ],
+    "type": [
+      "Floral",
+      "Balsamic"
+    ],
+    "alias": [],
+    "odor": "柔和甜花香、微香脂；增加厚度、融合感及留香。",
+    "accords": "白花、依蘭、鈴蘭、日曬花香、東方花香",
+    "usage": [
+      1,
+      20
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 原始標準 011",
+        "url": "https://ifrafragrance.org/standards/IFRA_STD_011.pdf"
+      },
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      }
+    ],
+    "ifraClass": "restriction",
+    "ifra": "IFRA 第51次修訂適用標準 IFRA_STD_011：成品重量百分比上限 Cat.4 7.3%；Cat.9 14%；Cat.10B 51%。需加總所有來源的同一成分；不等於成品合規證明。",
+    "limits": {
+      "cat4": 7.3,
+      "cat9": 14,
+      "cat10b": 51
+    },
+    "specification": ""
+  },
+  {
+    "en": "Citronellol",
+    "cn": "香茅醇",
+    "cas": "106-22-9",
+    "inci": "CITRONELLOL",
+    "id": 22,
+    "note": [
+      "Middle",
+      "Base"
+    ],
+    "type": [
+      "Floral",
+      "Rose"
+    ],
+    "alias": [
+      "3,7-Dimethyl-6-octenol"
+    ],
+    "odor": "柔潤玫瑰花瓣、清新柑橘；建立圓潤的花瓣體積。",
+    "accords": "玫瑰、天竺葵、牡丹、清新花香",
+    "usage": [
+      1,
+      15
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 原始標準 022",
+        "url": "https://ifrafragrance.org/standards/IFRA_STD_022.pdf"
+      },
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      }
+    ],
+    "ifraClass": "restriction",
+    "ifra": "IFRA 第51次修訂適用標準 IFRA_STD_022：成品重量百分比上限 Cat.4 12%；Cat.9 24%；Cat.10B 87%。需加總所有來源的同一成分；不等於成品合規證明。",
+    "limits": {
+      "cat4": 12,
+      "cat9": 24,
+      "cat10b": 87
+    },
+    "specification": ""
+  },
+  {
+    "en": "Dimethyl Benzyl Carbinyl Acetate",
+    "cn": "乙酸二甲基苄基原酯",
+    "cas": "151-05-3",
+    "inci": "DIMETHYL PHENETHYL ACETATE",
+    "id": 23,
+    "note": [
+      "Middle"
+    ],
+    "type": [
+      "Floral",
+      "Fruity"
+    ],
+    "alias": [
+      "DMBCA",
+      "DBCA",
+      "Dimethyl Phenethyl Acetate"
+    ],
+    "odor": "清甜花香、綠色果香，帶梨李與柔和木質感；銜接花果香。",
+    "accords": "玫瑰、鈴蘭、茉莉、梨、李子",
+    "usage": [
+      0.5,
+      5
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      },
+      {
+        "label": "INCI 名稱／CAS：韓國化粧品協會",
+        "url": "https://kcia.or.kr/cid/search/ingd_view.php?no=23753"
+      }
+    ],
+    "ifraClass": "no_specific_standard",
+    "ifra": "IFRA 第51次修訂索引：未查得獨立數值限量標準。不代表可直接接觸皮膚或免除成品安全評估；仍須核對供應商規格。",
+    "limits": null,
+    "specification": ""
+  },
+  {
+    "en": "Geraniol",
+    "cn": "香葉醇",
+    "cas": "106-24-1",
+    "inci": "GERANIOL",
+    "id": 2004,
+    "note": [
+      "Middle"
+    ],
+    "type": [
+      "Floral",
+      "Rose"
+    ],
+    "alias": [
+      "Geraniol Symrise"
+    ],
+    "odor": "明確玫瑰、天竺葵，帶草本與清銳感；建立玫瑰輪廓。",
+    "accords": "玫瑰、天竺葵、橙花、柑橘花香",
+    "usage": [
+      0.1,
+      8
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "Symrise Geraniol Fine 98% 原廠建議 0.1–8%；未確認你購買的具體品級。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 原始標準 037",
+        "url": "https://ifrafragrance.org/standards/IFRA_STD_037.pdf"
+      },
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      },
+      {
+        "label": "Symrise Geraniol Fine 98%",
+        "url": "https://www.symrise.com/fileadmin/symrise/Marketing/Scent_and_care/Aroma_molecules/Ingredient_finder/SYM_ohnePC_Datenblaetter/SYM_P_Geraniol_Fine_98_.pdf"
+      }
+    ],
+    "ifraClass": "restriction",
+    "ifra": "IFRA 第51次修訂適用標準 IFRA_STD_037：成品重量百分比上限 Cat.4 4.7%；Cat.9 2.8%；Cat.10B 5.3%。需加總所有來源的同一成分；不等於成品合規證明。",
+    "limits": {
+      "cat4": 4.7,
+      "cat9": 2.8,
+      "cat10b": 5.3
+    },
+    "specification": "",
+    "gradeNote": "Symrise 有多種 Geraniol 品級；請依瓶身確認。0.1–8% 參考 Geraniol Fine 98% 原廠資料。"
+  },
+  {
+    "en": "Hydroxycitronellal",
+    "cn": "羥基香茅醛",
+    "cas": "107-75-5",
+    "inci": "HYDROXYCITRONELLAL",
+    "id": 3003,
+    "note": [
+      "Middle"
+    ],
+    "type": [
+      "Floral",
+      "Muguet"
+    ],
+    "alias": [],
+    "odor": "柔甜鈴蘭、椴花，略帶濕潤綠感；建立柔和花香主體。",
+    "accords": "鈴蘭、紫丁香、椴花、牡丹、花束香",
+    "usage": [
+      1,
+      10
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 原始標準 043",
+        "url": "https://ifrafragrance.org/standards/IFRA_STD_043.pdf"
+      },
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      }
+    ],
+    "ifraClass": "restriction",
+    "ifra": "IFRA 第51次修訂適用標準 IFRA_STD_043：成品重量百分比上限 Cat.4 2.1%；Cat.9 4.1%；Cat.10B 7.8%。需加總所有來源的同一成分；不等於成品合規證明。",
+    "limits": {
+      "cat4": 2.1,
+      "cat9": 4.1,
+      "cat10b": 7.8
+    },
+    "specification": ""
+  },
+  {
+    "en": "Linalool",
+    "cn": "芳樟醇",
+    "cas": "78-70-6",
+    "inci": "LINALOOL",
+    "id": 3004,
+    "note": [
+      "Top",
+      "Middle"
+    ],
+    "type": [
+      "Floral",
+      "Citrus",
+      "Woody"
+    ],
+    "alias": [],
+    "odor": "清新花香、柑橘、淡木質；增加空氣感並銜接前中調。",
+    "accords": "薰衣草、佛手柑、橙花、茉莉、玫瑰、古龍",
+    "usage": [
+      1,
+      20
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 原始標準 187",
+        "url": "https://ifrafragrance.org/standards/IFRA_STD_187.pdf"
+      },
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      }
+    ],
+    "ifraClass": "specification",
+    "ifra": "IFRA_STD_187 規格要求：氧化產物維持在實際可達的低水平；原料過氧化值低於 20 mmol/L。 無數值限量表；仍需供應商規格確認。",
+    "limits": null,
+    "specification": "氧化產物維持在實際可達的低水平；原料過氧化值低於 20 mmol/L。"
+  },
+  {
+    "en": "Phenyl Ethyl Alcohol",
+    "cn": "苯乙醇",
+    "cas": "60-12-8",
+    "inci": "PHENETHYL ALCOHOL",
+    "id": 2016,
+    "note": [
+      "Middle"
+    ],
+    "type": [
+      "Floral",
+      "Rose"
+    ],
+    "alias": [
+      "PEA",
+      "Phenylethyl Alcohol",
+      "Phenethyl Alcohol"
+    ],
+    "odor": "柔和玫瑰花瓣、淡蜂蜜；建立自然花香體積。",
+    "accords": "玫瑰、牡丹、鈴蘭、茉莉、花束香",
+    "usage": [
+      5,
+      40
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      }
+    ],
+    "ifraClass": "no_specific_standard",
+    "ifra": "IFRA 第51次修訂索引：未查得獨立數值限量標準。不代表可直接接觸皮膚或免除成品安全評估；仍須核對供應商規格。",
+    "limits": null,
+    "specification": ""
+  },
+  {
+    "en": "Undecavertol",
+    "cn": "甲基癸烯醇",
+    "cas": "81782-77-6",
+    "inci": "METHYL DECENOL",
+    "id": 3005,
+    "note": [
+      "Top",
+      "Middle"
+    ],
+    "type": [
+      "Green",
+      "Floral",
+      "Fruity"
+    ],
+    "alias": [
+      "Undecavertol Givaudan",
+      "Methyl Decenol"
+    ],
+    "odor": "強烈綠色花香、紫羅蘭葉，帶梨與椴花感；少量增加鮮綠穿透力。",
+    "accords": "綠葉、鈴蘭、玫瑰、紫羅蘭葉、梨",
+    "usage": [
+      0.05,
+      1
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      },
+      {
+        "label": "Givaudan Undecavertol",
+        "url": "https://www.givaudan.com/fragrance-beauty/fragrance-ingredients-business/fragrance-molecules/undecavertol"
+      },
+      {
+        "label": "INCI 名稱／CAS：韓國化粧品協會",
+        "url": "https://kcia.or.kr/cid/search/ingd_view.php?no=8172"
+      }
+    ],
+    "ifraClass": "no_specific_standard",
+    "ifra": "IFRA 第51次修訂索引：未查得獨立數值限量標準。不代表可直接接觸皮膚或免除成品安全評估；仍須核對供應商規格。",
+    "limits": null,
+    "specification": "",
+    "gradeNote": "Givaudan 原廠建議微量至 5%；本表採較低的教學試作區間。"
+  },
+  {
+    "en": "Cis-3 Hexenol",
+    "cn": "葉醇",
+    "cas": "928-96-1",
+    "inci": "3-HEXENOL",
+    "id": 2032,
+    "note": [
+      "Top"
+    ],
+    "type": [
+      "Green",
+      "Fresh"
+    ],
+    "alias": [
+      "Leaf Alcohol",
+      "cis-3-Hexen-1-ol",
+      "CIS-3-HEXENOL"
+    ],
+    "odor": "新割青草、折斷枝葉、青澀植物汁液；比乙酸葉醇酯更直接生青。",
+    "accords": "綠葉、茶、玫瑰花莖、茉莉、草本",
+    "usage": [
+      0.01,
+      0.5
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      }
+    ],
+    "ifraClass": "no_specific_standard",
+    "ifra": "IFRA 第51次修訂索引：未查得獨立數值限量標準。不代表可直接接觸皮膚或免除成品安全評估；仍須核對供應商規格。",
+    "limits": null,
+    "specification": ""
+  },
+  {
+    "en": "Cyclamen Aldehyde",
+    "cn": "仙客來醛",
+    "cas": "103-95-7",
+    "inci": "CYCLAMEN ALDEHYDE",
+    "id": 3006,
+    "note": [
+      "Middle"
+    ],
+    "type": [
+      "Floral",
+      "Green",
+      "Marine"
+    ],
+    "alias": [
+      "Cyclamen Aldehyde Givaudan",
+      "Cyclamen Aldehyde Extra"
+    ],
+    "odor": "清新水感花香、綠葉與瓜果感；增加清透、濕潤及擴散。",
+    "accords": "仙客來、鈴蘭、水生花香、西瓜、海洋",
+    "usage": [
+      0.1,
+      3
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 原始標準 025",
+        "url": "https://ifrafragrance.org/standards/IFRA_STD_025.pdf"
+      },
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      },
+      {
+        "label": "Givaudan Cyclamen Aldehyde Extra",
+        "url": "https://www.givaudan.com/fragrance-beauty/fragrance-ingredients-business/fragrance-molecules/cyclamen-aldehyde-extra"
+      }
+    ],
+    "ifraClass": "restriction_specification",
+    "ifra": "IFRA 第51次修訂適用標準 IFRA_STD_025：成品重量百分比上限 Cat.4 0.95%；Cat.9 0.23%；Cat.10B 0.72%。需加總所有來源的同一成分；不等於成品合規證明。 Cyclamen Alcohol 含量不得超過 1.5%；需供應商規格確認。",
+    "limits": {
+      "cat4": 0.95,
+      "cat9": 0.23,
+      "cat10b": 0.72
+    },
+    "specification": "Cyclamen Alcohol 含量不得超過 1.5%；需供應商規格確認。",
+    "gradeNote": "Givaudan 公開資料為 Extra 品級；品級需核對。原廠用量範圍不取代成品 IFRA 限量。"
+  },
+  {
+    "en": "Helional",
+    "cn": "新洋茉莉醛",
+    "cas": "1205-17-0",
+    "inci": "METHYLENEDIOXYPHENYL METHYLPROPANAL",
+    "id": 13,
+    "note": [
+      "Middle"
+    ],
+    "type": [
+      "Marine",
+      "Floral",
+      "Green"
+    ],
+    "alias": [
+      "MMDHCA",
+      "Methylenedioxyphenyl Methylpropanal"
+    ],
+    "odor": "水感綠花香、臭氧、新割乾草；增加清涼空間感。",
+    "accords": "水生花香、仙客來、鈴蘭、海洋、清新木質",
+    "usage": [
+      0.1,
+      3
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 原始標準 059",
+        "url": "https://ifrafragrance.org/standards/IFRA_STD_059.pdf"
+      },
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      },
+      {
+        "label": "INCI 名稱／CAS：韓國化粧品協會",
+        "url": "https://kcia.or.kr/cid/search/ingd_view.php?no=7819"
+      }
+    ],
+    "ifraClass": "restriction",
+    "ifra": "IFRA 第51次修訂適用標準 IFRA_STD_059：成品重量百分比上限 Cat.4 2.6%；Cat.9 0.15%；Cat.10B 0.62%。需加總所有來源的同一成分；不等於成品合規證明。",
+    "limits": {
+      "cat4": 2.6,
+      "cat9": 0.15,
+      "cat10b": 0.62
+    },
+    "specification": ""
+  },
+  {
+    "en": "Aldehyde C-10",
+    "cn": "十醛",
+    "cas": "112-31-2",
+    "inci": "DECANAL",
+    "id": 2010,
+    "note": [
+      "Top"
+    ],
+    "type": [
+      "Aldehydic",
+      "Citrus",
+      "Waxy"
+    ],
+    "alias": [
+      "Aldehyde C10",
+      "Decanal"
+    ],
+    "odor": "橙皮、蠟質、脂肪醛香；微量增加明亮與皂感，用多易顯油蠟。",
+    "accords": "柑橘、橙花、醛香花束、皂香",
+    "usage": [
+      0.01,
+      0.5
+    ],
+    "usageBasis": "未稀釋有效單體占香精配方的重量百分比（w/w）；試作參考，非安全上限。",
+    "usageEvidence": "教學試作工作區間，非產業統計或 IFRA 限量。",
+    "amendment": "51st",
+    "reviewed": "2026-11-07",
+    "supplierStatus": "待核對實際品級／批次 SDS、規格及合規文件",
+    "sources": [
+      {
+        "label": "IFRA 第51次修訂索引",
+        "url": "https://ifrafragrance.org/docs/default-source/51st-amendment/ifra-51st-amendment---index-of-ifra-standards.pdf"
+      },
+      {
+        "label": "IFRA Fragrance Ingredient Glossary 氣味詞彙",
+        "url": "https://ifrafragrance.org/docs/default-source/glossary/ifra-fragrance-ingredient-glossary---april-2020.pdf"
+      }
+    ],
+    "ifraClass": "no_specific_standard",
+    "ifra": "IFRA 第51次修訂索引：未查得獨立數值限量標準。不代表可直接接觸皮膚或免除成品安全評估；仍須核對供應商規格。",
+    "limits": null,
+    "specification": ""
+  }
+];

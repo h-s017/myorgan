@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hfugue-organ-app-v20260915-safety-v1';
+const CACHE_NAME = 'hfugue-organ-app-v20261107-molecules-v1';
 const APP_ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,8 @@ const APP_ASSETS = [
   './config.js',
   './safety-data.js',
   './safety.js',
+  './safety-engine.js',
+  './material-catalog.js',
   './icons/logo-192.png',
   './icons/logo-512.png'
 ];
@@ -33,6 +35,10 @@ self.addEventListener('fetch', event => {
   const isAppShell = url.pathname.endsWith('/') ||
     url.pathname.endsWith('/index.html') ||
     url.pathname.endsWith('/config.js') ||
+    url.pathname.endsWith('/safety-data.js') ||
+    url.pathname.endsWith('/material-catalog.js') ||
+    url.pathname.endsWith('/safety.js') ||
+    url.pathname.endsWith('/safety-engine.js') ||
     url.pathname.endsWith('/manifest.json');
 
   if (isAppShell) {
@@ -56,3 +62,4 @@ self.addEventListener('fetch', event => {
     }).catch(() => caches.match('./index.html')))
   );
 });
+
