@@ -41,6 +41,11 @@
     const n=Number(input.replace('%','').trim());
     return n>0 && n<=100;
   }
+  function concentrationRatio(value) {
+    const input=String(value??'').trim();
+    const n=Number(input.replace('%','').trim());
+    return (!input.includes('%') && n>0 && n<=1 ? n*100 : n)/100;
+  }
   function evaluateRows(rows, materials, category, fragrancePct, options={}) {
     const materialMap=new Map(materials.map(m=>[String(m.id),m]));
     const active=rows.filter(r=>Number(r.amount)>0);
@@ -52,7 +57,7 @@
     const totalMeasuredStockG=measuredComplete
       ? active.reduce((sum,r)=>sum+Number(r.actualIngredientG),0):0;
     const totalMeasuredEffectiveG=measuredComplete
-      ? active.reduce((sum,r)=>sum+Number(r.actualIngredientG)*Number(String(r.concentration).replace('%','').trim())/100,0):0;
+      ? active.reduce((sum,r)=>sum+Number(r.actualIngredientG)*concentrationRatio(r.concentration),0):0;
     const hasMeasured=measuredComplete && totalMeasuredEffectiveG>0;
     const actualBase=options.actualBaseG;
     const hasFinishedMass=hasMeasured && actualBase!=null &&
@@ -63,7 +68,7 @@
       : null;
     const measuredMass=totalMeasuredStockG+Number(actualBase||0);
     const measuredUsage=row => {
-      const effective=Number(row.actualIngredientG)*Number(String(row.concentration).replace('%','').trim())/100;
+      const effective=Number(row.actualIngredientG)*concentrationRatio(row.concentration);
       return hasFinishedMass ? effective/measuredMass*100 :
         effective/totalMeasuredEffectiveG*fragrancePct;
     };
