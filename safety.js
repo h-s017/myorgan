@@ -27,7 +27,7 @@
     if (top && !document.getElementById('productCategory')) {
       const field = document.createElement('div');
       field.className = 'fg';
-      field.innerHTML = `<label>產品類別／IFRA 類別</label><select id="productCategory" class="product-category" onchange="recalc()"><option value="">請選擇產品類別</option><option value="cat4">香水／留香型 Cat.4</option><option value="cat9">洗沐／沖洗型 Cat.9</option><option value="cat10b">空間噴霧 Cat.10B</option></select>`;
+      field.innerHTML = `<label>產品類別／IFRA 類別</label><select id="productCategory" class="product-category" onchange="recalc()"><option value="cat4">香水／留香型 Cat.4（預設）</option><option value="cat9">洗沐／沖洗型 Cat.9</option><option value="cat10b">空間噴霧 Cat.10B</option></select>`;
       const concentration = document.getElementById('perfumeConcentration')?.closest('.fg');
       (concentration || top.lastElementChild)?.after(field);
     }
@@ -70,7 +70,7 @@
 
   function renderSafety() {
     ensureSafetyUI();
-    const category = document.getElementById('productCategory')?.value || '';
+    const category = document.getElementById('productCategory')?.value || 'cat4';
     const fragrancePct = parseConcentration(document.getElementById('perfumeConcentration')?.value || '20%');
     const hasG = rows.some(r => r.unit === 'g' && num(r.amount) > 0);
     const hasDrops = rows.some(r => r.unit === '滴' && num(r.amount) > 0);
@@ -96,6 +96,19 @@
       cell.innerHTML = `<span class="safety-badge ${result.level}">${result.label}</span><div class="safety-numbers">成品占比 ${fmt(result.actual)}${aggregate} · 上限 ${fmt(result.limit)}${usage}${hazards}<br>${esc(result.detail || "")}</div>`;
     });
     const active = results.filter(r => !r.blank);
+    const actualMode=(document.getElementById('ifraCalculationBasis')?.value||'actual')==='actual';
+    const actualRows=rows.filter(r=>String(r.materialId??'').trim() &&
+      (num(r.amount)>0 || String(r.actualIngredientG??'').trim()!==''));
+    const measuredRows=actualRows.filter(r=>String(r.actualIngredientG??'').trim()!==''
+      && Number.isFinite(Number(r.actualIngredientG)) && Number(r.actualIngredientG)>=0);
+    const measuredProgress=actualMode
+      ? '｜實秤資料 '+measuredRows.length+'/'+actualRows.length+' 項'
+      : '';
+    const measuredTotal=measuredRows.reduce((sum,r)=>sum+Number(r.actualIngredientG),0);
+    const measurementInfo=actualMode
+      ? '實際加入香精合計 '+measuredTotal.toFixed(3)+' g'+
+        (measuredRows.length!==actualRows.length?'（尚未填完整，不可判定）':'')
+      : '採用目標配方比例';
     const summary = document.getElementById('safetySummary');
     if (!summary) return;
 
@@ -117,7 +130,7 @@
       else { level = 'ok'; title = '🟢 目前未發現 IFRA 超量'; }
     }
     summary.className = `safety-summary ${level}`;
-    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜數值未超量 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}</div><div class="safety-legal">計算依據：${active.find(r=>r.basis)?.basis || '目標配方比例／待完成實秤'}。依 CW 文件與 IFRA 第51次修訂資料初篩，同原料各列加總；未計入香基中未知受限成分貢獻，不代表成品合規證明。</div>`;
+    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜數值未超量 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}${measuredProgress}</div><div class="safety-detail">${measurementInfo}</div><div class="safety-legal">計算依據：${active.find(r=>r.basis)?.basis || '目標配方比例／待完成實秤'}。依 CW 文件與 IFRA 第51次修訂資料初篩，同原料各列加總；未計入香基中未知受限成分貢獻，不代表成品合規證明。</div>`;
   }
 
   function patchApp() {
@@ -128,7 +141,7 @@
     const baseCollectMeta = collectMetaFromDom;
     collectMetaFromDom = function () {
       const meta = baseCollectMeta.apply(this, arguments);
-      meta.productCategory = document.getElementById('productCategory')?.value || '';
+      meta.productCategory = document.getElementById('productCategory')?.value || 'cat4';
       meta.ifraCalculationBasis = document.getElementById('ifraCalculationBasis')?.value || 'actual';
       return meta;
     };
@@ -137,7 +150,7 @@
       const result = baseApplyMeta.apply(this, arguments);
       ensureSafetyUI();
       const select = document.getElementById('productCategory');
-      if (select) select.value = formula?.productCategory || '';
+      if (select) select.value = formula?.productCategory || 'cat4';
       const basis=document.getElementById('ifraCalculationBasis');
       if (basis) basis.value=formula?.ifraCalculationBasis==='target'?'target':'actual';
       return result;
@@ -156,7 +169,8 @@
       return result;
     };
     const current = typeof currentFormula === 'function' ? currentFormula() : null;
-    if (current && typeof current.productCategory !== 'string') current.productCategory = '';
+    if (current && !current.productCategory) current.productCategory = 'cat4';
+    applyMetaToDom(current);
     if (current && !['target','actual'].includes(current.ifraCalculationBasis)) current.ifraCalculationBasis = 'actual';
     renderFormula();
   }
