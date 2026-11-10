@@ -41,6 +41,19 @@ assert.equal(engine.resolve({...helional,kind:'香基'}),null);
 assert.equal(engine.resolve({id:1001,en:'Custom mix',kind:'香基'}),null);
 assert.equal(engine.resolve(catalog.enrich({id:20,en:'Undercavertol',cas:'67694-66-6'})),null);
 assert.equal(engine.resolve({id:1001,en:'Bitter Lemon',kind:'香基'}).limits.cat4,11.049);
+
+ // Legacy localStorage IDs may differ from the CW master database.
+const historicalBase={id:9001,en:' Bitter   Lemon ',kind:'香基'};
+assert.equal(engine.resolve(historicalBase).limits.cat4,11.049);
+assert.equal(engine.resolve({id:9002,en:'BITTER LEMON',kind:'香基'}).key,'cw:1001');
+assert.equal(engine.resolve({id:9003,en:'Bitter Lemon fragrance',kind:'香基'}),null);
+assert.equal(engine.resolve({id:9004,en:'Bitter Lemon',kind:'單體'}),null);
+assert.equal(engine.resolve({id:1001,en:'Not the supplier base',kind:'香基'}),null);
+const legacyRows=[row(historicalBase,20),row({id:1001,en:'Bitter Lemon',kind:'香基'},20)];
+const legacyResults=engine.evaluateRows(legacyRows,[historicalBase,{id:1001,en:'Bitter Lemon',kind:'香基'}],'cat4',30);
+assert.equal(legacyResults[0].level,'over');
+assert.equal(legacyResults[1].aggregateActual,12);
+
 // Existing ID and personal notes survive a once-only reference correction.
 const old=catalog.enrich({id:13,en:'Helional',cas:'1205-17-0',inci:'HELIONAL',ifra:'查無特定限制',ifraClass:'no_specific_standard',personal:'keep',advisors:[]});
 assert.equal(old.id,13);assert.equal(old.inci,'METHYLENEDIOXYPHENYL METHYLPROPANAL');assert.equal(old.personal,'keep');
