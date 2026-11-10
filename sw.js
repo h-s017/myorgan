@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hfugue-organ-app-v20261110-ifra-basis-v3';
+const CACHE_NAME = 'hfugue-organ-app-v20261111-actual-grams-v4';
 const APP_ASSETS = [
   './',
   './index.html',
