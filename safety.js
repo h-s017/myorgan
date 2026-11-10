@@ -38,13 +38,13 @@
         const th = document.createElement('th');
         th.className = 'safety-head';
         th.textContent = 'IFRA 配方初篩';
-        header.insertBefore(th, header.children[7] || null);
+        header.insertBefore(th, header.children[8] || null);
       }
       [...table.querySelectorAll('tbody tr')].forEach(tr => {
         if (tr.querySelector('.safety-cell')) return;
         const td = document.createElement('td');
         td.className = 'safety-cell';
-        tr.insertBefore(td, tr.children[7] || null);
+        tr.insertBefore(td, tr.children[8] || null);
       });
     }
     const wrap = document.querySelector('#panel-formula .table-wrap');
