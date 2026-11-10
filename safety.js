@@ -69,8 +69,11 @@
     const hasG = rows.some(r => r.unit === 'g' && num(r.amount) > 0);
     const hasDrops = rows.some(r => r.unit === '滴' && num(r.amount) > 0);
     const mixed = hasG && hasDrops;
+    const actualBaseInput=document.getElementById('actualBaseG')?.value.trim() || '';
+    const actualBaseG=actualBaseInput!==''&&Number.isFinite(Number(actualBaseInput))&&Number(actualBaseInput)>=0
+      ? Number(actualBaseInput):null;
     const results = HFUGUE_FORMULA_SAFETY.evaluateRows(rows, db, category, fragrancePct, {
-      mixed, drops:hasDrops,
+      mixed, drops:hasDrops, actualBaseG,
       invalidConcentration:!HFUGUE_FORMULA_SAFETY.validConcentration(document.getElementById('perfumeConcentration')?.value)
     });
     [...document.querySelectorAll('#formulaRows tr')].forEach((tr, index) => {
@@ -83,7 +86,7 @@
       const usage = result.usage != null && Number.isFinite(result.usage) ? ` · 使用率 ${fmt(result.usage, 1)}` : '';
       const hazards = result.hazards > 0 ? `<br>MSDS：${result.hazards} 項危害聲明` : '';
       const aggregate = result.aggregateActual != null ? ` · 同成分合計 ${fmt(result.aggregateActual)}` : '';
-      cell.innerHTML = `<span class="safety-badge ${result.level}">${result.label}</span><div class="safety-numbers">目標成品 ${fmt(result.actual)}${aggregate} · 上限 ${fmt(result.limit)}${usage}${hazards}<br>${esc(result.detail || "")}</div>`;
+      cell.innerHTML = `<span class="safety-badge ${result.level}">${result.label}</span><div class="safety-numbers">成品占比 ${fmt(result.actual)}${aggregate} · 上限 ${fmt(result.limit)}${usage}${hazards}<br>${esc(result.detail || "")}</div>`;
     });
     const active = results.filter(r => !r.blank);
     const summary = document.getElementById('safetySummary');
@@ -107,7 +110,7 @@
       else { level = 'ok'; title = '🟢 目前未發現 IFRA 超量'; }
     }
     summary.className = `safety-summary ${level}`;
-    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜數值未超量 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}</div><div class="safety-legal">依 CW 文件與 IFRA 第51次修訂單體資料，按目標有效香料濃度初篩；同成分各列已加總。未計入複方中未知成分貢獻，實際秤重、原料規格與成品法規仍需複核。</div>`;
+    summary.innerHTML = `<div class="safety-title">${title}</div><div class="safety-detail">${CATEGORY_LABELS[category]} · 已檢核 ${active.length} 項｜數值未超量 ${ok}｜接近 ${near}｜超量／禁用 ${over}｜待複核 ${review}</div><div class="safety-legal">計算依據：${active.find(r=>r.basis)?.basis || '目標配方比例／待完成實秤'}。依 CW 文件與 IFRA 第51次修訂資料初篩，同原料各列加總；未計入香基中未知受限成分貢獻，不代表成品合規證明。</div>`;
   }
 
   function patchApp() {
