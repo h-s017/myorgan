@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hfugue-organ-app-v20261107-molecules-v1';
+const CACHE_NAME = 'hfugue-organ-app-v20261110-measured-ifra-v2';
 const APP_ASSETS = [
   './',
   './index.html',

@@ -41,13 +41,43 @@
     const n=Number(input.replace('%','').trim());
     return n>0 && n<=100;
   }
+  function concentrationRatio(value) {
+    const input=String(value??'').trim();
+    const n=Number(input.replace('%','').trim());
+    return (!input.includes('%') && n>0 && n<=1 ? n*100 : n)/100;
+  }
   function evaluateRows(rows, materials, category, fragrancePct, options={}) {
     const materialMap=new Map(materials.map(m=>[String(m.id),m]));
+    const active=rows.filter(r=>Number(r.amount)>0);
+    const measuredComplete=active.length>0&&active.every(r=>
+      String(r.actualIngredientG??'').trim()!=='' &&
+      Number.isFinite(Number(r.actualIngredientG)) && Number(r.actualIngredientG)>=0 &&
+      validConcentration(r.concentration)
+    );
+    const totalMeasuredStockG=measuredComplete
+      ? active.reduce((sum,r)=>sum+Number(r.actualIngredientG),0):0;
+    const totalMeasuredEffectiveG=measuredComplete
+      ? active.reduce((sum,r)=>sum+Number(r.actualIngredientG)*concentrationRatio(r.concentration),0):0;
+    const hasMeasured=measuredComplete && totalMeasuredEffectiveG>0;
+    const actualBase=options.actualBaseG;
+    const hasFinishedMass=hasMeasured && actualBase!=null &&
+      Number.isFinite(Number(actualBase)) && Number(actualBase)>=0 &&
+      totalMeasuredStockG+Number(actualBase)>0;
+    const measuredBasis=hasMeasured
+      ? (hasFinishedMass?'實際完成成品重量':'依目標香精濃度與實秤比例估算')
+      : null;
+    const measuredMass=totalMeasuredStockG+Number(actualBase||0);
+    const measuredUsage=row => {
+      const effective=Number(row.actualIngredientG)*concentrationRatio(row.concentration);
+      return hasFinishedMass ? effective/measuredMass*100 :
+        effective/totalMeasuredEffectiveG*fragrancePct;
+    };
     const totals=new Map();
     rows.forEach(row=>{
       const data=resolve(materialMap.get(String(row.materialId)));
-      if(data && Number.isFinite(row.rowPercentNumber) && row.rowPercentNumber>0) {
-        totals.set(data.key,(totals.get(data.key)||0)+row.rowPercentNumber*fragrancePct/100);
+      const percent=hasMeasured ? measuredUsage(row) : row.rowPercentNumber*fragrancePct/100;
+      if(data && Number(row.amount)>0 && Number.isFinite(percent) && percent>=0) {
+        totals.set(data.key,(totals.get(data.key)||0)+percent);
       }
     });
     return rows.map(row=>{
@@ -55,9 +85,12 @@
       const material=materialMap.get(String(row.materialId));
       const result={level:'review',label:'⚪ 待人工複核',actual:null,limit:null,detail:''};
       if (!material) return {...result,detail:'尚未選擇原料'};
-      if(options.mixed || options.drops) return {...result,detail:options.mixed?'請統一重量單位；g 與滴數不可合併':'滴數無法確認重量百分比；請秤重後檢核'};
-      if(options.invalidConcentration || !validConcentration(row.concentration) || !(row.rowPercentNumber>0))return {...result,detail:'濃度須大於 0 且不超過 100%；請確認有效香料比例'};
-      const actual=row.rowPercentNumber*fragrancePct/100;
+      if((options.mixed || options.drops) && !hasMeasured)
+        return {...result,detail:'滴數無法直接換算重量；請填妥所有使用原料的「實際加入香精 g」'};
+      if(!validConcentration(row.concentration) || (!hasFinishedMass && options.invalidConcentration) ||
+        (!hasMeasured && !(row.rowPercentNumber>0)))
+        return {...result,detail:'請確認原料濃度與目標成品香精濃度'};
+      const actual=hasMeasured?measuredUsage(row):row.rowPercentNumber*fragrancePct/100;
       if(!category)return {...result,actual,label:'⚪ 請先選類別',detail:'尚未選擇產品／IFRA 類別'};
       if(material.identityReview)return {...result,actual,detail:material.identityReview};
       const data=resolve(material);
@@ -65,7 +98,8 @@
         ? {...result,actual,level:'prohibited',label:'🔴 禁止使用',limit:0,detail:'IFRA 分級為 Prohibition'}
         : {...result,actual,detail:'尚未建立此原料的查核資料'};
       const aggregateActual=totals.get(data.key);
-      const base={...result,actual,aggregateActual,aggregateKey:data.key,limit:data.limits?.[category] ?? null,hazards:data.hazards,detail:'同成分各列已加總；未包含其他複方帶入的未知貢獻。'};
+      const base={...result,actual,aggregateActual,aggregateKey:data.key,limit:data.limits?.[category] ?? null,hazards:data.hazards,
+        basis:measuredBasis||'目標配方比例',detail:(measuredBasis||'目標配方比例')+'；同一原料各列已加總，未包含其他複方未知成分的貢獻。'};
       if(data.molecule && base.limit==null)return {...base,label:'⚪ 待規格複核',detail:data.molecule.specification || '未查得獨立數值限量；仍須供應商文件與成品安全評估。'};
       if(!data.molecule && (data.docs!=='ready' || base.limit==null))return {...base,label:'⚪ 文件／數值待複核',detail:data.docs==='missing'?'供應商文件缺件':'此類別限量資料不足'};
       const usage=base.limit>0?aggregateActual/base.limit*100:Infinity;

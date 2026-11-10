@@ -42,6 +42,25 @@ assert.equal(engine.resolve({id:1001,en:'Custom mix',kind:'香基'}),null);
 assert.equal(engine.resolve(catalog.enrich({id:20,en:'Undercavertol',cas:'67694-66-6'})),null);
 assert.equal(engine.resolve({id:1001,en:'Bitter Lemon',kind:'香基'}).limits.cat4,11.049);
 
+const weighedBases=[
+  {id:1001,en:'Bitter Lemon',kind:'香基'},
+  {id:1062,en:'Musk',kind:'香基'}
+];
+const weighedRows=[
+  {materialId:1001,amount:2,unit:'滴',concentration:'100%',actualIngredientG:'0.21',rowPercentNumber:50},
+  {materialId:1062,amount:7,unit:'滴',concentration:'100%',actualIngredientG:'0.82',rowPercentNumber:50}
+];
+const targetMeasured=engine.evaluateRows(weighedRows,weighedBases,'cat4',20,{drops:true});
+assert.notEqual(targetMeasured[0].level,'review');
+assert.equal(targetMeasured[0].basis,'依目標香精濃度與實秤比例估算');
+assert.ok(Math.abs(targetMeasured[0].actual-0.21/1.03*20)<1e-9);
+const finishedMeasured=engine.evaluateRows(weighedRows,weighedBases,'cat4',20,{drops:true,actualBaseG:8.97});
+assert.equal(finishedMeasured[0].basis,'實際完成成品重量');
+assert.ok(Math.abs(finishedMeasured[0].actual-2.1)<1e-9);
+assert.equal(engine.evaluateRows([{...weighedRows[0]}, {...weighedRows[1],actualIngredientG:''}],weighedBases,'cat4',20,{drops:true})[0].level,'review');
+assert.equal(engine.evaluateRows(weighedRows,weighedBases,'cat4',20,{drops:true,actualBaseG:8.97})[0].aggregateKey,'cw:1001');
+
+
  // Legacy localStorage IDs may differ from the CW master database.
 const historicalBase={id:9001,en:' Bitter   Lemon ',kind:'香基'};
 assert.equal(engine.resolve(historicalBase).limits.cat4,11.049);
