@@ -65,6 +65,14 @@ assert.notEqual(selectedTargetGrams[0].level,'review');
 assert.ok(Math.abs(selectedTargetGrams[0].actual-10)<1e-9);
 const selectedActualIncomplete=engine.evaluateRows(weighedRows.map((r,i)=>i?{...r,actualIngredientG:''}:r),weighedBases,'cat4',20,{calculationBasis:'actual'});
 assert.equal(selectedActualIncomplete[0].level,'review');
+const measuredOnly=[{materialId:1001,amount:'',unit:'滴',concentration:'100%',actualIngredientG:'0.78',rowPercentNumber:0}];
+const measuredOnlyResult=engine.evaluateRows(measuredOnly,[{id:1001,en:'Bitter Lemon',kind:'香基'}],'cat4',20,{calculationBasis:'actual',actualBaseG:9.22});
+assert.ok(Math.abs(measuredOnlyResult[0].actual-7.8)<1e-9);
+assert.equal(measuredOnlyResult[0].basis,'實際完成成品重量');
+const missingOne=engine.evaluateRows([weighedRows[0],{...weighedRows[1],actualIngredientG:''}],weighedBases,'cat4',20,{calculationBasis:'actual'});
+assert.match(missingOne[0].detail,/1 項原料未填/);
+assert.equal(engine.evaluateRows(measuredOnly,[{id:1001,en:'Bitter Lemon',kind:'香基'}],'cat4',20,{calculationBasis:'actual'})[0].basis,'依目標香精濃度與實秤比例估算');
+
 
 assert.ok(Math.abs(finishedMeasured[0].actual-2.1)<1e-9);
 assert.equal(engine.evaluateRows([{...weighedRows[0]}, {...weighedRows[1],actualIngredientG:''}],weighedBases,'cat4',20,{drops:true})[0].level,'review');

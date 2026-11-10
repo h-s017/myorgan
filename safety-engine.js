@@ -48,7 +48,14 @@
   }
   function evaluateRows(rows, materials, category, fragrancePct, options={}) {
     const materialMap=new Map(materials.map(m=>[String(m.id),m]));
-    const active=rows.filter(r=>Number(r.amount)>0);
+    const useMeasured=options.calculationBasis !== 'target';
+    // The measured-weight field is authoritative in actual mode. A user can
+    // record a weighed material even when its original drops/parts field is blank.
+    const isActive=row=>useMeasured
+      ? Boolean(String(row.materialId??'').trim()) &&
+        (Number(row.amount)>0 || String(row.actualIngredientG??'').trim()!=='')
+      : Number(row.amount)>0;
+    const active=rows.filter(isActive);
     const measuredComplete=active.length>0&&active.every(r=>
       String(r.actualIngredientG??'').trim()!=='' &&
       Number.isFinite(Number(r.actualIngredientG)) && Number(r.actualIngredientG)>=0 &&
@@ -58,7 +65,6 @@
       ? active.reduce((sum,r)=>sum+Number(r.actualIngredientG),0):0;
     const totalMeasuredEffectiveG=measuredComplete
       ? active.reduce((sum,r)=>sum+Number(r.actualIngredientG)*concentrationRatio(r.concentration),0):0;
-    const useMeasured=options.calculationBasis !== 'target';
     const hasMeasured=useMeasured && measuredComplete && totalMeasuredEffectiveG>0;
     const actualBase=options.actualBaseG;
     const hasFinishedMass=hasMeasured && actualBase!=null &&
@@ -77,17 +83,25 @@
     rows.forEach(row=>{
       const data=resolve(materialMap.get(String(row.materialId)));
       const percent=hasMeasured ? measuredUsage(row) : row.rowPercentNumber*fragrancePct/100;
-      if(data && Number(row.amount)>0 && Number.isFinite(percent) && percent>=0) {
+      if(data && isActive(row) && Number.isFinite(percent) && percent>=0) {
         totals.set(data.key,(totals.get(data.key)||0)+percent);
       }
     });
     return rows.map(row=>{
-      if (!(Number(row.amount)>0)) return {level:'review',blank:true,label:'—',detail:''};
+      if (!isActive(row)) return {level:'review',blank:true,label:'—',detail:''};
       const material=materialMap.get(String(row.materialId));
       const result={level:'review',label:'⚪ 待人工複核',actual:null,limit:null,detail:''};
       if (!material) return {...result,detail:'尚未選擇原料'};
-      if(useMeasured && !hasMeasured)
-        return {...result,detail:'已選擇實際秤重：請完整輸入每項使用原料的實際加入香精 g（不可依滴數推算）'};
+      if(useMeasured && !hasMeasured) {
+        const missing=active.filter(r=>String(r.actualIngredientG??'').trim()==='').length;
+        const invalid=active.filter(r=>String(r.actualIngredientG??'').trim()!=='' &&
+          (!Number.isFinite(Number(r.actualIngredientG)) || Number(r.actualIngredientG)<0 ||
+           !validConcentration(r.concentration))).length;
+        return {...result,detail:missing
+          ? '實際秤重模式：仍有 '+missing+' 項原料未填「實際加入香精 g」；請補齊後計算'
+          : invalid?'實際秤重模式：有 '+invalid+' 項克數或原料濃度無效'
+          :'實際秤重模式：有效香料總重須大於 0 g'};
+      }
       if(!useMeasured && (options.mixed || options.drops))
         return {...result,detail:'目標配方模式下，滴數無法確認重量百分比；請改用 g 或選擇實際秤重模式'};
       if(!validConcentration(row.concentration) || (!hasFinishedMass && options.invalidConcentration) ||
