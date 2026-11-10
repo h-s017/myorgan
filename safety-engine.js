@@ -4,6 +4,17 @@
   const cw = new Map((source.rows || []).map(([id,cat4,cat9,cat10b,hazards,docs]) =>
     [String(id), {limits:{cat4,cat9,cat10b},hazards,docs}]));
   const molecules = new Map((source.singleMolecules || []).map(r => [r.cas,r]));
+  // Old browser records can retain a previous ID. Resolve CW bases by their
+  // original product identity, never by a similar/suggested scent name.
+  const normalizeBaseName = name => String(name || '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase();
+  const baseIdsByName = new Map();
+  Object.entries(source.materialNames || {}).forEach(([id, name]) => {
+    const key = normalizeBaseName(name);
+    if (!key) return;
+    const ids = baseIdsByName.get(key) || [];
+    ids.push(id);
+    baseIdsByName.set(key, ids);
+  });
   function resolve(material) {
     if (!material || material.identityReview) return null;
     const kind = material.kind || ((material.type || []).includes('香基') ? '香基' : '單體');
@@ -11,10 +22,18 @@
       const molecule = molecules.get(String(material.cas || '').trim());
       return molecule ? {key:'cas:'+molecule.cas, molecule, limits:molecule.limits} : null;
     }
-    const data = cw.get(String(material.id));
-    const expected = source.materialNames?.[String(material.id)];
-    if (kind !== '香基' || !data || expected !== material.en) return null;
-    return {...data,key:'cw:'+material.id};
+    if (kind !== '香基') return null;
+    const id = String(material.id);
+    const name = normalizeBaseName(material.en);
+    const expected = normalizeBaseName(source.materialNames?.[id]);
+    // If an ID belongs to a different known CW base, reject it rather than
+    // silently assigning that base's IFRA limits to the wrong formula item.
+    if (cw.has(id) && expected === name) return {...cw.get(id),key:'cw:'+id};
+    const candidates = baseIdsByName.get(name) || [];
+    if (candidates.length !== 1) return null;
+    const canonicalId = candidates[0];
+    const data = cw.get(canonicalId);
+    return data ? {...data,key:'cw:'+canonicalId} : null;
   }
   function validConcentration(value) {
     const input=String(value ?? '').trim();
