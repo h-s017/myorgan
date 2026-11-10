@@ -475,7 +475,7 @@ function recalc(){
   const actualRowSum=enteredRows.reduce((sum,r)=>sum+num(r.actualIngredientG),0);
   const allRowsMeasured=activeRows.length>0&&enteredRows.length===activeRows.length&&actualValuesValid;
   const actualSumEl=document.getElementById('totalActualIngredientG');
-  if(actualSumEl)actualSumEl.textContent=enteredRows.length?(actualValuesValid?actualRowSum.toFixed(3).replace(/\\.?0+$/,'')+' g'+(allRowsMeasured?'':'（部分）'):'請檢查數值'):'—';
+  if(actualSumEl)actualSumEl.textContent=enteredRows.length?(actualValuesValid?actualRowSum.toFixed(3).replace(/\.?0+$/,'')+' g'+(allRowsMeasured?'':'（部分）'):'請檢查數值'):'—';
   const actualFragranceG=hasActualFragrance?Math.max(0,num(actualFragranceEl.value)):(allRowsMeasured?actualRowSum:(mixed?0:totalStockG));
   const actualBaseG=hasActualBase?num(actualBaseEl.value):0;
   const actualCompletedG=actualFragranceG+actualBaseG;
