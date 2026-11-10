@@ -58,7 +58,8 @@
       ? active.reduce((sum,r)=>sum+Number(r.actualIngredientG),0):0;
     const totalMeasuredEffectiveG=measuredComplete
       ? active.reduce((sum,r)=>sum+Number(r.actualIngredientG)*concentrationRatio(r.concentration),0):0;
-    const hasMeasured=measuredComplete && totalMeasuredEffectiveG>0;
+    const useMeasured=options.calculationBasis !== 'target';
+    const hasMeasured=useMeasured && measuredComplete && totalMeasuredEffectiveG>0;
     const actualBase=options.actualBaseG;
     const hasFinishedMass=hasMeasured && actualBase!=null &&
       Number.isFinite(Number(actualBase)) && Number(actualBase)>=0 &&
@@ -85,8 +86,10 @@
       const material=materialMap.get(String(row.materialId));
       const result={level:'review',label:'⚪ 待人工複核',actual:null,limit:null,detail:''};
       if (!material) return {...result,detail:'尚未選擇原料'};
-      if((options.mixed || options.drops) && !hasMeasured)
-        return {...result,detail:'滴數無法直接換算重量；請填妥所有使用原料的「實際加入香精 g」'};
+      if(useMeasured && !hasMeasured)
+        return {...result,detail:'已選擇實際秤重：請完整輸入每項使用原料的實際加入香精 g（不可依滴數推算）'};
+      if(!useMeasured && (options.mixed || options.drops))
+        return {...result,detail:'目標配方模式下，滴數無法確認重量百分比；請改用 g 或選擇實際秤重模式'};
       if(!validConcentration(row.concentration) || (!hasFinishedMass && options.invalidConcentration) ||
         (!hasMeasured && !(row.rowPercentNumber>0)))
         return {...result,detail:'請確認原料濃度與目標成品香精濃度'};

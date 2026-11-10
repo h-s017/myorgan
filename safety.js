@@ -31,6 +31,12 @@
       const concentration = document.getElementById('perfumeConcentration')?.closest('.fg');
       (concentration || top.lastElementChild)?.after(field);
     }
+    if (top && !document.getElementById('ifraCalculationBasis')) {
+      const field=document.createElement('div');
+      field.className='fg';
+      field.innerHTML='<label>IFRA 計算依據</label><select id="ifraCalculationBasis" class="product-category" onchange="recalc()"><option value="actual">實際秤重 g（優先）</option><option value="target">目標配方比例</option></select>';
+      document.getElementById('productCategory')?.closest('.fg')?.after(field);
+    }
     const table = document.querySelector('#panel-formula table');
     if (table) {
       const header = table.querySelector('thead tr');
@@ -74,6 +80,7 @@
       ? Number(actualBaseInput):null;
     const results = HFUGUE_FORMULA_SAFETY.evaluateRows(rows, db, category, fragrancePct, {
       mixed, drops:hasDrops, actualBaseG,
+      calculationBasis:document.getElementById('ifraCalculationBasis')?.value||'actual',
       invalidConcentration:!HFUGUE_FORMULA_SAFETY.validConcentration(document.getElementById('perfumeConcentration')?.value)
     });
     [...document.querySelectorAll('#formulaRows tr')].forEach((tr, index) => {
@@ -122,6 +129,7 @@
     collectMetaFromDom = function () {
       const meta = baseCollectMeta.apply(this, arguments);
       meta.productCategory = document.getElementById('productCategory')?.value || '';
+      meta.ifraCalculationBasis = document.getElementById('ifraCalculationBasis')?.value || 'actual';
       return meta;
     };
     const baseApplyMeta = applyMetaToDom;
@@ -130,6 +138,8 @@
       ensureSafetyUI();
       const select = document.getElementById('productCategory');
       if (select) select.value = formula?.productCategory || '';
+      const basis=document.getElementById('ifraCalculationBasis');
+      if (basis) basis.value=formula?.ifraCalculationBasis==='target'?'target':'actual';
       return result;
     };
     const baseRecalc = recalc;
@@ -147,6 +157,7 @@
     };
     const current = typeof currentFormula === 'function' ? currentFormula() : null;
     if (current && typeof current.productCategory !== 'string') current.productCategory = '';
+    if (current && !['target','actual'].includes(current.ifraCalculationBasis)) current.ifraCalculationBasis = 'actual';
     renderFormula();
   }
 
