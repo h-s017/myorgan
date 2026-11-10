@@ -56,6 +56,16 @@ assert.equal(targetMeasured[0].basis,'依目標香精濃度與實秤比例估算
 assert.ok(Math.abs(targetMeasured[0].actual-0.21/1.03*20)<1e-9);
 const finishedMeasured=engine.evaluateRows(weighedRows,weighedBases,'cat4',20,{drops:true,actualBaseG:8.97});
 assert.equal(finishedMeasured[0].basis,'實際完成成品重量');
+const selectedActual=engine.evaluateRows(weighedRows,weighedBases,'cat4',20,{drops:true,calculationBasis:'actual',actualBaseG:8.97});
+assert.ok(Math.abs(selectedActual[0].actual-2.1)<1e-9);
+const selectedTargetDrop=engine.evaluateRows(weighedRows,weighedBases,'cat4',20,{drops:true,calculationBasis:'target'});
+assert.equal(selectedTargetDrop[0].level,'review');
+const selectedTargetGrams=engine.evaluateRows(weighedRows.map(r=>({...r,unit:'g'})),weighedBases,'cat4',20,{calculationBasis:'target'});
+assert.notEqual(selectedTargetGrams[0].level,'review');
+assert.ok(Math.abs(selectedTargetGrams[0].actual-10)<1e-9);
+const selectedActualIncomplete=engine.evaluateRows(weighedRows.map((r,i)=>i?{...r,actualIngredientG:''}:r),weighedBases,'cat4',20,{calculationBasis:'actual'});
+assert.equal(selectedActualIncomplete[0].level,'review');
+
 assert.ok(Math.abs(finishedMeasured[0].actual-2.1)<1e-9);
 assert.equal(engine.evaluateRows([{...weighedRows[0]}, {...weighedRows[1],actualIngredientG:''}],weighedBases,'cat4',20,{drops:true})[0].level,'review');
 assert.equal(engine.evaluateRows(weighedRows,weighedBases,'cat4',20,{drops:true,actualBaseG:8.97})[0].aggregateKey,'cw:1001');
