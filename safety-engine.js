@@ -6,7 +6,7 @@
   const molecules = new Map((source.singleMolecules || []).map(r => [r.cas,r]));
   // Old browser records can retain a previous ID. Resolve CW bases by their
   // original product identity, never by a similar/suggested scent name.
-  const normalizeBaseName = name => String(name || '').normalize('NFKC').trim().replace(/\\s+/g, ' ').toLowerCase();
+  const normalizeBaseName = name => String(name || '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase();
   const baseIdsByName = new Map();
   Object.entries(source.materialNames || {}).forEach(([id, name]) => {
     const key = normalizeBaseName(name);
