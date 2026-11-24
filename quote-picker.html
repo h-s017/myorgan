@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>選取報價配方｜MY ORGAN</title>
+<style>
+*{box-sizing:border-box}body{max-width:38rem;margin:auto;padding:2rem 1.25rem;color:#202124;background:#fff;font:20px/1.65 "Noto Serif TC","Songti TC",serif}h1{font-size:1.6rem}label,select,button{display:block;width:100%}select,button{padding:.65rem;margin:.35rem 0 1rem;font:inherit;border:1px solid #777;border-radius:.3rem;background:white;color:#202124}button{background:#272727;color:white;cursor:pointer}button:disabled{opacity:.5}small{font-size:17px}p{margin:.55rem 0 1.25rem}
+</style>
+</head>
+<body><main><small>MY ORGAN</small><h1>選取報價配方</h1><p>選擇這台裝置已儲存的一支配方，將工作快照帶到目前開啟的報價案件。</p>
+<label>作品名稱<select id="formulas"></select></label><p id="summary"></p><button id="send" disabled>帶入目前報價</button><p id="status" role="status"></p>
+</main>
+<script>
+'use strict';
+const settings=new URLSearchParams(location.hash.slice(1));
+const target=settings.get('origin'),token=settings.get('request');
+const select=document.getElementById('formulas'),send=document.getElementById('send'),statusLine=document.getElementById('status');
+const connected=window.opener && ['https://hanascent.com','https://www.hanascent.com'].includes(target) && /^[a-f0-9-]{36}$/.test(token||'');
+function stored(key){const value=localStorage.getItem(key);return value?JSON.parse(value):null;}
+let list=[],catalog=new Map(),timer;
+function usableRows(f){return (f.rows||[]).filter(r=>r&&String(r.materialId??'').trim()!=='');}
+function show(){const f=list[select.selectedIndex];document.getElementById('summary').textContent=f?[f.formulaDate,usableRows(f).length+' 筆原料'].filter(Boolean).join(' · '):'';send.disabled=!f||!connected;}
+try{
+ const saved=stored('hfugue-organ-formulas-v2');let entries=saved?.formulas;
+ if(!Array.isArray(entries)||!entries.length){const old=stored('hfugue-organ-formula-v1');entries=old?[old]:[];}
+ list=entries.filter(f=>Array.isArray(f?.rows)&&usableRows(f).length);
+ catalog=new Map((stored('hfugue-organ-stable-db-v3-re-advisors-selects')||[]).map(m=>[String(m.id),m]));
+ list.forEach((f,i)=>{const opt=document.createElement('option');opt.value=String(i);opt.textContent=f.workName||'未命名配方';select.append(opt);if(saved?.activeFormulaId&&f.id===saved.activeFormulaId)select.value=String(i);});
+ if(!connected)statusLine.textContent='請從報價後台的「從 MY ORGAN 選配方」開啟。';
+ else if(!list.length)statusLine.textContent='這個瀏覽器沒有已儲存且含原料的配方。可在原裝置的 MY ORGAN 下載 JSON，再回報價頁匯入。';
+ show();
+}catch{statusLine.textContent='無法讀取本機配方。請改用 MY ORGAN 的 JSON 備份。';}
+select.onchange=show;
+send.onclick=()=>{
+ const f=list[select.selectedIndex];if(!connected||!f||window.opener.closed){statusLine.textContent='報價頁已關閉，請回報價頁重新選取。';return;}
+ const formula={id:f.id,workName:f.workName,formulaDate:f.formulaDate,perfumeCapacity:f.perfumeCapacity,perfumeConcentration:f.perfumeConcentration,actualFragranceG:f.actualFragranceG,actualBaseG:f.actualBaseG,designNote:f.designNote,rows:usableRows(f).map(r=>{
+   const m=catalog.get(String(r.materialId))||{};return {materialId:r.materialId,materialEn:m.en,materialCn:m.cn,concentration:r.concentration,amount:r.amount,unit:r.unit,actualIngredientG:r.actualIngredientG,targetIngredientG:r.targetIngredientG,rowPercent:r.rowPercent,reason:r.reason};
+ })};
+ window.opener.postMessage({type:'hana-organ-quote-selection-v1',token,formula},target);
+ send.disabled=true;statusLine.textContent='正在傳送這支配方…';clearTimeout(timer);timer=setTimeout(()=>{statusLine.textContent='報價頁尚未回覆。請回到原案件重新開啟選擇視窗，或使用 JSON。';show();},5000);
+};
+window.addEventListener('message',e=>{if(!connected||e.origin!==target||e.source!==window.opener||e.data?.token!==token||e.data?.type!=='hana-organ-quote-received-v1')return;clearTimeout(timer);statusLine.textContent='配方已帶入報價頁。';window.close();});
+</script></body></html>
